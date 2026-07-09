@@ -1,31 +1,508 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard ทำเนียบนักสังคมสงเคราะห์ทางการแพทย์</title> <link rel="icon" type="image/png" href="https://img5.pic.in.th/file/secure-sv1/logo-MOPH270452adfe737af2.png">
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden; /* ซ่อน Scrollbar ของหน้าหลัก */
-        }
-        iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Dashboard นักสังคมสงเคราะห์ทางการแพทย์</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.dataTables.min.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap');
+    body { font-family: 'Sarabun', sans-serif; background-color: #f3f4f6; }
+    .bg-moph { background-color: #006a4e; }
+    .text-moph { color: #006a4e; }
+    .card-stat { transition: transform 0.2s; }
+    .card-stat:hover { transform: translateY(-5px); }
+    .nav-link.active { border-bottom: 3px solid white; font-weight: bold; background-color: rgba(255,255,255,0.1); }
+    .chart-container { position: relative; height: 300px; width: 100%; }
+    .fa-spin-fast { animation: fa-spin 0.5s infinite linear; }
+  </style>
 </head>
 <body>
 
-    <iframe src="https://script.google.com/macros/s/AKfycbyJH9OAbEB8L6RlG1OW81f8znc8n4kUiBvXDRR49LkHF-d_E5r7b7brEWQHQN3uqSkL/exec?page=dashboard">
-        เบราว์เซอร์ของคุณไม่รองรับการแสดงผล iframe
-    </iframe>
+  <nav id="navbar" class="bg-moph text-white shadow-lg sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center flex-wrap gap-2">
+      <div class="flex items-center space-x-3">
+        <div class="bg-white p-1 rounded-full shadow-md">
+           <img src="https://img1.pic.in.th/images/Seal.png" alt="MOPH Logo" class="h-9 w-9 object-contain">
+        </div>
+        <div>
+          <h1 class="text-xl font-bold">Dashboard นักสังคมสงเคราะห์ทางการแพทย์</h1>
+          <p class="text-xs text-green-100">สำนักปลัดกระทรวงสาธารณสุข</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+         <div id="lastUpdatedBadge" class="hidden text-xs bg-white/10 px-3 py-1.5 rounded-lg">
+            <i class="fas fa-clock mr-1"></i> อัปเดตล่าสุด: <span id="lastUpdatedText">-</span>
+         </div>
+         <a href="https://socialworkdn.github.io/MSWdatabase/" target="_top" class="bg-green-400 hover:bg-green-500 text-green-900 font-bold py-2 px-4 rounded shadow transition flex items-center">
+            <i class="fas fa-edit mr-2"></i> ไปหน้าบันทึกข้อมูล
+         </a>
+      </div>
+    </div>
+    <div class="bg-black/20 text-white border-t border-white/10">
+      <div class="container mx-auto flex overflow-x-auto">
+        <button onclick="switchView('overview')" id="btn-overview" class="nav-link active px-6 py-3 whitespace-nowrap hover:bg-white/10"><i class="fas fa-chart-bar mr-2"></i>ภาพรวมสถิติ</button>
+        <button onclick="switchView('database')" id="btn-database" class="nav-link px-6 py-3 whitespace-nowrap hover:bg-white/10"><i class="fas fa-database mr-2"></i>ฐานข้อมูลรวม</button>
+        <button onclick="switchView('retiree')" id="btn-retiree" class="nav-link px-6 py-3 whitespace-nowrap hover:bg-white/10"><i class="fas fa-user-clock mr-2"></i>ผู้เกษียณอายุ</button>
+      </div>
+    </div>
+  </nav>
 
+  <div id="filterBar" class="bg-white shadow-sm border-b">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-end gap-3">
+       <button onclick="refreshData()" id="btnRefresh" class="bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 font-bold py-2 px-4 rounded shadow-sm transition flex items-center mr-auto md:mr-0">
+          <i class="fas fa-sync-alt mr-2 text-blue-600"></i> รีเฟรชข้อมูล
+       </button>
+       <div class="flex items-center gap-2">
+           <span class="text-gray-600 font-bold hidden md:inline"><i class="fas fa-filter mr-1"></i> กรองข้อมูล:</span>
+           <select id="regionFilter" onchange="renderDashboard()" class="border-gray-300 border rounded-md p-2 shadow-sm focus:ring-blue-500">
+              <option value="all">แสดงข้อมูลทั่วประเทศ</option>
+              <script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">เขตสุขภาพที่ ${i}</option>`);</script>
+           </select>
+       </div>
+    </div>
+  </div>
+
+  <div id="loading" class="text-center py-20">
+      <i class="fas fa-spinner fa-spin text-5xl text-moph"></i>
+      <p class="mt-4 text-gray-500">กำลังประมวลผลข้อมูล...</p>
+  </div>
+
+  <div id="mainContent" class="hidden container mx-auto px-4 py-8 pb-20">
+    <!-- View: Overview -->
+    <div id="view-overview" class="view-section">
+       <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-teal-500 pl-3">ข้อมูลโรงพยาบาล</h3>
+       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+           <div class="bg-white p-6 rounded-xl shadow border-t-4 border-teal-600 flex flex-col justify-center items-center">
+               <div class="text-gray-500 text-lg">จำนวนโรงพยาบาลทั้งหมด</div>
+               <div class="text-5xl font-bold text-teal-700 mt-2" id="statHospTotal">0</div>
+               <div class="text-sm text-gray-400 mt-1">แห่ง</div>
+           </div>
+           <div class="md:col-span-2 bg-white p-4 rounded-xl shadow border border-gray-100">
+               <div class="font-bold text-gray-600 mb-2 text-center">สัดส่วนแยกตามระดับโรงพยาบาล</div>
+               <div class="chart-container" style="height: 250px;"><canvas id="chartHospitals"></canvas></div>
+           </div>
+       </div>
+
+       <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-moph pl-3">ข้อมูลอัตรากำลังบุคลากร</h3>
+       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div class="grid grid-cols-2 gap-4 md:col-span-2">
+              <div class="card-stat bg-white p-4 rounded-xl shadow border-l-4 border-blue-500">
+                 <div class="text-gray-500 text-xs">ผู้ปฏิบัติงานทั้งหมด</div><div class="text-2xl font-bold text-blue-700" id="statTotal">0</div><div class="text-xs text-gray-400 mt-1">คน</div>
+              </div>
+              <div class="card-stat bg-white p-4 rounded-xl shadow border-l-4 border-green-500">
+                 <div class="text-gray-500 text-xs">ข้าราชการ</div><div id="statCivil" class="text-2xl font-bold text-green-700">0</div>
+              </div>
+              <div class="card-stat bg-white p-4 rounded-xl shadow border-l-4 border-purple-500">
+                 <div class="text-gray-500 text-xs">พนักงาน/ลูกจ้าง</div><div id="statOtherEmp" class="text-2xl font-bold text-purple-700">0</div>
+              </div>
+              <div class="card-stat bg-white p-4 rounded-xl shadow border-l-4 border-red-500">
+                 <div class="text-gray-500 text-xs">ตำแหน่งว่าง</div><div id="statVacancy" class="text-2xl font-bold text-red-700">0</div>
+              </div>
+          </div>
+          <div class="bg-white p-4 rounded-xl shadow border border-gray-100">
+              <div class="font-bold text-gray-600 mb-2 text-center">ภาพรวมสถานะอัตรากำลัง</div>
+              <div class="chart-container" style="height: 200px;"><canvas id="chartWorkforce"></canvas></div>
+          </div>
+       </div>
+
+       <div class="bg-white rounded-xl shadow p-6 border border-red-100 mb-8">
+           <div class="text-gray-700 font-bold mb-4"><i class="fas fa-exclamation-circle text-red-500"></i> รายละเอียดตำแหน่งว่างแยกตามประเภท</div>
+           <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
+               <div class="p-2"><div class="text-xs text-gray-500">ข้าราชการ</div><div class="text-xl font-bold text-gray-800" id="vacCivil">0</div><div class="w-full bg-gray-200 rounded-full h-1.5 mt-2"><div class="bg-red-500 h-1.5 rounded-full" id="barVacCivil" style="width: 0%"></div></div></div>
+               <div class="p-2"><div class="text-xs text-gray-500">พนักงานราชการ</div><div class="text-xl font-bold text-gray-800" id="vacGov">0</div><div class="w-full bg-gray-200 rounded-full h-1.5 mt-2"><div class="bg-orange-500 h-1.5 rounded-full" id="barVacGov" style="width: 0%"></div></div></div>
+               <div class="p-2"><div class="text-xs text-gray-500">พนักงานกระทรวงสาธารณสุข</div><div class="text-xl font-bold text-gray-800" id="vacMoph">0</div><div class="w-full bg-gray-200 rounded-full h-1.5 mt-2"><div class="bg-yellow-500 h-1.5 rounded-full" id="barVacMoph" style="width: 0%"></div></div></div>
+               <div class="p-2"><div class="text-xs text-gray-500">ลูกจ้างชั่วคราว</div><div class="text-xl font-bold text-gray-800" id="vacTemp">0</div><div class="w-full bg-gray-200 rounded-full h-1.5 mt-2"><div class="bg-blue-400 h-1.5 rounded-full" id="barVacTemp" style="width: 0%"></div></div></div>
+           </div>
+       </div>
+
+       <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-indigo-500 pl-3">ข้อมูลระดับตำแหน่ง (Positions)</h3>
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <div class="bg-white rounded-lg shadow p-4">
+             <div class="font-bold text-gray-600 mb-2 text-center">กราฟแสดงจำนวนแยกตามระดับ (%)</div>
+             <div class="chart-container" style="height: 300px;"><canvas id="chartPositions"></canvas></div>
+          </div>
+          <div class="bg-white rounded-lg shadow overflow-hidden h-full">
+             <div class="bg-gray-50 px-4 py-3 border-b font-bold text-gray-700 text-sm">ตารางสรุปจำนวนและร้อยละ</div>
+             <table class="min-w-full divide-y divide-gray-200"><tbody class="divide-y divide-gray-200" id="tablePositions"></tbody></table>
+          </div>
+       </div>
+
+       <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-orange-500 pl-3">สถิติระยะเวลาและประสบการณ์</h3>
+       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div class="bg-white rounded-xl shadow p-5 border border-gray-100">
+             <div class="text-orange-600 font-bold mb-3 text-sm"><i class="fas fa-hourglass-half mr-2"></i>อายุงาน</div>
+             <div class="grid grid-cols-3 gap-2 text-center divide-x">
+                <div><div class="text-xs text-gray-400">ต่ำสุด</div><div id="tenureMin" class="font-bold text-lg">0</div><span class="text-xs">ปี</span></div>
+                <div><div class="text-xs text-gray-400">สูงสุด</div><div id="tenureMax" class="font-bold text-lg">0</div><span class="text-xs">ปี</span></div>
+                <div><div class="text-xs text-gray-400">เฉลี่ย</div><div id="tenureAvg" class="font-bold text-lg text-orange-600">0</div><span class="text-xs">ปี</span></div>
+             </div>
+          </div>
+          <div class="bg-white rounded-xl shadow p-5 border-t-4 border-blue-500 relative overflow-hidden">
+             <div class="text-blue-800 font-bold mb-3 text-sm"><i class="fas fa-briefcase-medical mr-2"></i>ประสบการณ์การแพทย์</div>
+             <div class="grid grid-cols-3 gap-2 text-center divide-x">
+                <div><div class="text-xs text-gray-400">ต่ำสุด</div><div id="expMin" class="font-bold text-lg">0</div><span class="text-xs">ปี</span></div>
+                <div><div class="text-xs text-gray-400">สูงสุด</div><div id="expMax" class="font-bold text-lg">0</div><span class="text-xs">ปี</span></div>
+                <div><div class="text-xs text-gray-400">เฉลี่ย</div><div id="expAvg" class="font-bold text-lg text-blue-600">0</div><span class="text-xs">ปี</span></div>
+             </div>
+          </div>
+          <div class="bg-white rounded-xl shadow p-5 border border-gray-100">
+             <div class="text-indigo-600 font-bold mb-3 text-sm"><i class="fas fa-layer-group mr-2"></i>เวลาในระดับปัจจุบัน</div>
+             <div class="grid grid-cols-3 gap-2 text-center divide-x">
+                <div><div class="text-xs text-gray-400">ต่ำสุด</div><div id="levelMin" class="font-bold text-lg">0</div><span class="text-xs">ปี</span></div>
+                <div><div class="text-xs text-gray-400">สูงสุด</div><div id="levelMax" class="font-bold text-lg">0</div><span class="text-xs">ปี</span></div>
+                <div><div class="text-xs text-gray-400">เฉลี่ย</div><div id="levelAvg" class="font-bold text-lg text-indigo-600">0</div><span class="text-xs">ปี</span></div>
+             </div>
+          </div>
+       </div>
+
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div class="bg-white rounded-xl shadow p-4 border-l-4 border-green-500">
+             <div class="font-bold text-green-800 text-sm mb-2"><i class="fas fa-graduation-cap"></i> วุฒิการศึกษา (สังคมสงเคราะห์)</div>
+             <div class="flex justify-between items-center text-sm px-4">
+                 <div>มีวุฒิ: <span class="font-bold text-lg text-green-700 ml-2" id="statHasDegree">0</span></div>
+                 <div>ไม่มี: <span class="font-bold text-lg text-red-600 ml-2" id="statNoDegree">0</span></div>
+             </div>
+          </div>
+          <div class="bg-white rounded-xl shadow overflow-hidden">
+             <div class="grid grid-cols-2 h-full">
+                 <div class="border-r p-4">
+                     <div class="font-bold text-yellow-800 text-sm mb-2"><i class="fas fa-certificate"></i> ใบประกอบวิชาชีพฯ</div>
+                     <div id="miniTableLicense" class="text-sm space-y-2"></div>
+                 </div>
+                 <div class="p-4">
+                     <div class="font-bold text-blue-800 text-sm mb-2"><i class="fas fa-users"></i> สมาชิกสภาวิชาชีพฯ</div>
+                     <div id="miniTableCouncil" class="text-sm space-y-2"></div>
+                 </div>
+             </div>
+          </div>
+       </div>
+    </div> 
+
+    <!-- View: Database -->
+    <div id="view-database" class="view-section hidden">
+       <div class="bg-white p-6 rounded-xl shadow border border-blue-100">
+          <div class="flex justify-between items-center mb-4">
+             <h2 class="text-xl font-bold text-moph"><i class="fas fa-database mr-2"></i> ฐานข้อมูลนักสังคมสงเคราะห์ทั้งหมด</h2>
+             <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">Update Real-time</span>
+          </div>
+          <table id="fullTable" class="stripe hover row-border" style="width:100%">
+             <thead>
+                <tr class="bg-moph text-white text-left">
+                   <th>เขต</th><th>โรงพยาบาล</th><th>ชื่อ-สกุล</th><th>ตำแหน่ง</th><th>อายุงาน</th><th>ใบประกอบฯ</th><th>สถานะ</th>
+                </tr>
+             </thead>
+             <tbody></tbody>
+          </table>
+       </div>
+    </div>
+
+    <!-- View: Retiree -->
+    <div id="view-retiree" class="view-section hidden">
+       <div class="bg-white p-8 rounded-xl shadow max-w-5xl mx-auto">
+          <h2 class="text-2xl font-bold text-red-700 mb-6 text-center"><i class="fas fa-user-clock mr-2"></i> ตรวจสอบผู้เกษียณอายุราชการ</h2>
+          <div class="flex flex-wrap gap-4 mb-6 bg-red-50 p-6 rounded-lg justify-center items-end border border-red-100">
+             <div>
+                <label class="block text-sm font-bold text-red-800 mb-1">เลือกปีงบประมาณ (พ.ศ.)</label>
+                <input type="number" id="fiscalYear" value="2569" class="border p-2 rounded w-32 text-center text-lg font-bold text-red-600">
+             </div>
+             <button onclick="calcRetirees()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg shadow font-bold h-full">ค้นหา</button>
+             <button id="btnExportRetirees" onclick="exportRetireesToExcel()" class="hidden bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow font-bold h-full"><i class="fas fa-file-excel mr-2"></i> Export Excel</button>
+          </div>
+          <div id="retireeCount" class="text-sm text-gray-500 mb-2"></div>
+          <div class="overflow-x-auto">
+             <table class="min-w-full divide-y divide-gray-200">
+                <thead><tr class="bg-red-600 text-white text-left text-sm"><th class="px-6 py-3">ชื่อ-สกุล</th><th class="px-6 py-3">ตำแหน่ง</th><th class="px-6 py-3">เขตสุขภาพ</th><th class="px-6 py-3">โรงพยาบาล</th><th class="px-6 py-3">ประเภทบุคลากร</th></tr></thead>
+                <tbody id="retireTableBody" class="bg-white divide-y divide-gray-200"></tbody>
+             </table>
+          </div>
+       </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ==========================================
+    // API CONFIGURATION (แก้ไข URL ด้านล่างนี้)
+    // ==========================================
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyJH9OAbEB8L6RlG1OW81f8znc8n4kUiBvXDRR49LkHF-d_E5r7b7brEWQHQN3uqSkL/exec'; 
+
+    async function apiCall(action, payload = {}) {
+        payload.action = action;
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("API Error:", error);
+            throw error;
+        }
+    }
+
+    Chart.register(ChartDataLabels);
+    let rawData = { personnel: [], hospitals: [] };
+    let charts = { hosp: null, work: null, pos: null };
+
+    function escapeHtml(str) {
+       if (str === null || str === undefined) return '';
+       return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    function currentFiscalYearBE() {
+       const now = new Date();
+       const beYear = now.getFullYear() + 543;
+       return (now.getMonth() + 1) >= 10 ? beYear + 1 : beYear;
+    }
+
+    window.onload = function() {
+       document.getElementById('fiscalYear').value = currentFiscalYearBE();
+       loadData();
+    };
+
+    function fmtNum(n) { return (n || 0).toLocaleString('th-TH'); }
+
+    function loadData(forceRefresh) {
+       apiCall('getDashboardDataPackage', { forceRefresh: !!forceRefresh })
+          .then(res => {
+             document.getElementById('loading').classList.add('hidden');
+             const refreshIcon = document.querySelector('#btnRefresh i');
+             if(refreshIcon) refreshIcon.classList.remove('fa-spin-fast');
+
+             if(res.error) { Swal.fire('ข้อผิดพลาด', res.message || 'ไม่สามารถโหลดข้อมูลได้', 'error'); }
+             else {
+                rawData = res;
+                document.getElementById('mainContent').classList.remove('hidden');
+                if (res.generatedAt) {
+                   const dt = new Date(res.generatedAt);
+                   document.getElementById('lastUpdatedText').textContent = dt.toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
+                   document.getElementById('lastUpdatedBadge').classList.remove('hidden');
+                }
+                renderDashboard();
+                renderFullTable();
+             }
+          })
+          .catch(err => {
+             document.getElementById('loading').classList.add('hidden');
+             Swal.fire('เกิดข้อผิดพลาดในการเชื่อมต่อ', (err && err.message) ? err.message : 'กรุณาลองใหม่อีกครั้ง', 'error');
+          });
+    }
+
+    function refreshData() {
+        document.getElementById('loading').classList.remove('hidden');
+        document.getElementById('mainContent').classList.add('hidden');
+        document.querySelector('#btnRefresh i').classList.add('fa-spin-fast');
+        loadData(true); 
+    }
+
+    function switchView(viewName) {
+       document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+       document.getElementById('view-'+viewName).classList.remove('hidden');
+       document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+       document.getElementById('btn-'+viewName).classList.add('active');
+    }
+
+    const calcPct = (val, total) => (total > 0 ? ((val / total) * 100).toFixed(1) : 0) + '%';
+
+    function renderDashboard() {
+       const region = document.getElementById('regionFilter').value;
+       let pData = rawData.personnel; if(region !== 'all') pData = pData.filter(r => r[1] == region);
+       let hData = rawData.hospitals; if(region !== 'all') hData = hData.filter(h => h[2] == region);
+
+       document.getElementById('statHospTotal').innerText = fmtNum(hData.length);
+       renderHospitalChart(hData);
+
+       const total = pData.length;
+       const civil = pData.filter(r => r[20] == 'ข้าราชการ').length;
+       const govEmp = pData.filter(r => ['พนักงานราชการ','พนักงานกระทรวงสาธารณสุข','ลูกจ้างชั่วคราว'].includes(r[20])).length;
+
+       let vacCivil=0, vacGov=0, vacMoph=0, vacTemp=0;
+       hData.forEach(h => {
+           vacCivil += (parseInt(h[7])||0); vacGov += (parseInt(h[8])||0);
+           vacMoph += (parseInt(h[9])||0); vacTemp += (parseInt(h[10])||0);
+       });
+       let totalVac = vacCivil + vacGov + vacMoph + vacTemp;
+       let totalFrame = total + totalVac; 
+
+       document.getElementById('statTotal').innerText = fmtNum(total);
+       document.getElementById('statCivil').innerHTML = `${fmtNum(civil)} <span class="text-sm font-normal text-gray-500">(${calcPct(civil, total)})</span>`;
+       document.getElementById('statOtherEmp').innerHTML = `${fmtNum(govEmp)} <span class="text-sm font-normal text-gray-500">(${calcPct(govEmp, total)})</span>`;
+       document.getElementById('statVacancy').innerHTML = `${fmtNum(totalVac)} <span class="text-sm font-normal text-red-400">(${calcPct(totalVac, totalFrame)})</span>`;
+
+       document.getElementById('vacCivil').innerText = fmtNum(vacCivil); document.getElementById('barVacCivil').style.width = (totalVac?vacCivil/totalVac*100:0) + "%";
+       document.getElementById('vacGov').innerText = fmtNum(vacGov); document.getElementById('barVacGov').style.width = (totalVac?vacGov/totalVac*100:0) + "%";
+       document.getElementById('vacMoph').innerText = fmtNum(vacMoph); document.getElementById('barVacMoph').style.width = (totalVac?vacMoph/totalVac*100:0) + "%";
+       document.getElementById('vacTemp').innerText = fmtNum(vacTemp); document.getElementById('barVacTemp').style.width = (totalVac?vacTemp/totalVac*100:0) + "%";
+
+       renderWorkforceChart(civil, govEmp, totalVac);
+
+       const posCounts = { 'นักสังคมสงเคราะห์เชี่ยวชาญ': 0, 'นักสังคมสงเคราะห์ชำนาญการพิเศษ': 0, 'นักสังคมสงเคราะห์ชำนาญการ': 0, 'นักสังคมสงเคราะห์ปฏิบัติการ': 0, 'นักสังคมสงเคราะห์': 0, 'อื่น ๆ': 0 };
+       pData.forEach(r => {
+           let pos = r[15] || '';
+           if(pos.includes('เชี่ยวชาญ')) posCounts['นักสังคมสงเคราะห์เชี่ยวชาญ']++;
+           else if(pos.includes('ชำนาญการพิเศษ')) posCounts['นักสังคมสงเคราะห์ชำนาญการพิเศษ']++;
+           else if(pos.includes('ชำนาญการ')) posCounts['นักสังคมสงเคราะห์ชำนาญการ']++;
+           else if(pos.includes('ปฏิบัติการ')) posCounts['นักสังคมสงเคราะห์ปฏิบัติการ']++;
+           else if(pos === 'นักสังคมสงเคราะห์') posCounts['นักสังคมสงเคราะห์']++;
+           else posCounts['อื่น ๆ']++;
+       });
+
+       renderPositionChart(posCounts);
+
+       let posHtml = '';
+       for(let [k,v] of Object.entries(posCounts)) {
+           let displayVal = v > 0 ? `<span class="text-indigo-700 font-bold">${fmtNum(v)}</span>` : `<span class="text-gray-300">0</span>`;
+           let pct = v > 0 ? `<span class="text-xs text-gray-500 ml-1">(${calcPct(v, total)})</span>` : '';
+           posHtml += `<tr><td class="px-4 py-2 text-sm text-gray-700">${escapeHtml(k)}</td><td class="px-4 py-2 text-right font-bold">${displayVal} ${pct}</td></tr>`;
+       }
+       document.getElementById('tablePositions').innerHTML = posHtml;
+
+       const tenureStats = calcTimeStats(pData, 16);
+       const levelStats = calcTimeStats(pData, 18);
+       const expStats = calcNumericStats(pData, 31);
+
+       document.getElementById('tenureMin').innerText = tenureStats.min; document.getElementById('tenureMax').innerText = tenureStats.max; document.getElementById('tenureAvg').innerText = tenureStats.avg;
+       document.getElementById('levelMin').innerText = levelStats.min; document.getElementById('levelMax').innerText = levelStats.max; document.getElementById('levelAvg').innerText = levelStats.avg;
+       document.getElementById('expMin').innerText = expStats.min; document.getElementById('expMax').innerText = expStats.max; document.getElementById('expAvg').innerText = expStats.avg;
+
+       const hasDeg = pData.filter(r => r[24] == 'มี').length;
+       const noDeg = pData.filter(r => r[24] == 'ไม่มี').length;
+       document.getElementById('statHasDegree').innerHTML = `${fmtNum(hasDeg)} <span class="text-xs text-green-500 font-normal">(${calcPct(hasDeg, total)})</span>`;
+       document.getElementById('statNoDegree').innerHTML = `${fmtNum(noDeg)} <span class="text-xs text-red-400 font-normal">(${calcPct(noDeg, total)})</span>`;
+
+       renderMiniTable('miniTableLicense', 28, {'มี': 'text-green-600', 'ไม่มี': 'text-red-600', 'หมดอายุ': 'text-orange-500', 'กำลังต่ออายุ': 'text-blue-500'}, pData);
+       renderMiniTable('miniTableCouncil', 25, {'เป็น': 'text-blue-600', 'ไม่เป็น': 'text-gray-500', 'หมดอายุ': 'text-orange-500'}, pData);
+
+       if($.fn.DataTable.isDataTable('#fullTable')) {
+          const table = $('#fullTable').DataTable();
+          if(region === 'all') table.column(0).search('').draw();
+          else table.column(0).search('^'+region+'$', true, false).draw();
+       }
+    }
+
+    function renderHospitalChart(hData) {
+        let counts = {}; hData.forEach(h => { let lvl = h[3]||'N/A'; counts[lvl] = (counts[lvl]||0)+1; });
+        let ctx = document.getElementById('chartHospitals').getContext('2d');
+        if(charts.hosp) charts.hosp.destroy();
+        charts.hosp = new Chart(ctx, {
+            type: 'doughnut',
+            data: { labels: Object.keys(counts), datasets: [{ data: Object.values(counts), backgroundColor: ['#2dd4bf', '#0d9488', '#115e59', '#14b8a6', '#99f6e4', '#ccfbf1'] }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' }, datalabels: { color: '#fff', formatter: (v, ctx) => { let s=0; ctx.chart.data.datasets[0].data.map(d=>{s+=d}); return (v*100/s).toFixed(1)+"%"; } } } }
+        });
+    }
+
+    function renderWorkforceChart(civil, other, vac) {
+        let ctx = document.getElementById('chartWorkforce').getContext('2d');
+        if(charts.work) charts.work.destroy();
+        charts.work = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: ['ข้าราชการ', 'พนักงาน/ลูกจ้าง', 'ตำแหน่งว่าง'], datasets: [{ label: 'จำนวน', data: [civil, other, vac], backgroundColor: ['#22c55e', '#a855f7', '#ef4444'], borderRadius: 5 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', formatter: (v, ctx) => { let s=0; ctx.chart.data.datasets[0].data.map(d=>{s+=d}); return v+" ("+(v*100/s).toFixed(1)+"%)"; } } } }
+        });
+    }
+
+    function renderPositionChart(counts) {
+        let ctx = document.getElementById('chartPositions').getContext('2d');
+        if(charts.pos) charts.pos.destroy();
+        charts.pos = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: Object.keys(counts), datasets: [{ label: 'จำนวน', data: Object.values(counts), backgroundColor: '#6366f1', borderRadius: 4 }] },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'right', formatter: (v, ctx) => { let s=0; ctx.chart.data.datasets[0].data.map(d=>{s+=d}); return v>0?(v*100/s).toFixed(1)+"%":""; } } } }
+        });
+    }
+
+    function renderMiniTable(id, idx, colorMap, data) {
+        let counts = {}; for(let k in colorMap) counts[k] = 0;
+        data.forEach(r => { for(let k in colorMap) if(String(r[idx]).includes(k)) counts[k]++; });
+        let html = ''; let total = data.length;
+        for(let [k, css] of Object.entries(colorMap)) {
+            let pct = total > 0 ? ((counts[k]/total)*100).toFixed(1) + '%' : '0%';
+            html += `<div class="flex justify-between items-center"><span class="${css}">${escapeHtml(k)}</span><div><span class="font-bold mr-1">${fmtNum(counts[k])}</span><span class="text-xs text-gray-400">(${pct})</span></div></div>`;
+        }
+        document.getElementById(id).innerHTML = html;
+    }
+
+    function calcTimeStats(data, dateIdx) {
+        const now = new Date();
+        let years = data.map(r => { let d = new Date(r[dateIdx]); if (!isNaN(d.getTime())) return Math.abs(now - d)/(1000*60*60*24*365.25); return null; }).filter(y => y !== null);
+        if (years.length === 0) return { min: 0, max: 0, avg: 0 };
+        let min = Math.min(...years); let max = Math.max(...years); let sum = years.reduce((a, b) => a + b, 0);
+        return { min: min.toFixed(1), max: max.toFixed(1), avg: (sum / years.length).toFixed(1) };
+    }
+
+    function calcNumericStats(data, idx) {
+        let values = data.map(r => parseFloat(r[idx])).filter(v => !isNaN(v));
+        if (values.length === 0) return { min: 0, max: 0, avg: 0 };
+        let min = Math.min(...values); let max = Math.max(...values); let sum = values.reduce((a, b) => a + b, 0);
+        return { min: min, max: max, avg: (sum / values.length).toFixed(1) };
+    }
+
+    function renderFullTable() {
+       const now = new Date();
+       const rows = rawData.personnel.map(r => {
+           let tenure = 0; if(r[16]) tenure = ((now - new Date(r[16])) / (1000 * 60 * 60 * 24 * 365.25)).toFixed(1);
+           const licenseStatus = r[28];
+           const badgeClass = licenseStatus=='มี' ? 'bg-green-100 text-green-800' : (licenseStatus=='หมดอายุ' ? 'bg-orange-100 text-orange-800' : 'bg-red-100 text-red-800');
+           return [ escapeHtml(r[1]), escapeHtml(r[4]), escapeHtml(`${r[8]}${r[9]} ${r[10]}`), escapeHtml(r[15]), tenure, `<span class="px-2 py-0.5 rounded text-xs ${badgeClass}">${escapeHtml(licenseStatus)}</span>`, `<span class="text-xs text-gray-500">${escapeHtml(r[20])}</span>` ];
+       });
+       $('#fullTable').DataTable({
+          data: rows, responsive: true, destroy: true,
+          columns: [{ title: "เขต" }, { title: "โรงพยาบาล" }, { title: "ชื่อ-สกุล" }, { title: "ตำแหน่ง" }, { title: "อายุงาน" }, { title: "ใบประกอบฯ" }, { title: "สถานะ" }],
+          pageLength: 10, language: { search: "ค้นหา:", lengthMenu: "แสดง _MENU_ รายการ", info: "แสดง _START_ ถึง _END_ จาก _TOTAL_ รายการ", paginate: { next: "ถัดไป", previous: "ก่อนหน้า" } }
+       });
+    }
+
+    let currentRetireeResults = [];
+    let currentRetireeYear = null;
+
+    function calcRetirees() {
+       const year = parseInt(document.getElementById('fiscalYear').value);
+       currentRetireeYear = year;
+       apiCall('checkRetirees', { year: year })
+         .then(res => {
+            if(res.error) { Swal.fire('เกิดข้อผิดพลาด', res.error, 'error'); return; }
+            currentRetireeResults = res.data || [];
+            const tbody = document.getElementById('retireTableBody');
+            const countEl = document.getElementById('retireeCount');
+            const exportBtn = document.getElementById('btnExportRetirees');
+
+            if(currentRetireeResults.length === 0) {
+               tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-500">ไม่พบผู้เกษียณในปีงบประมาณนี้</td></tr>';
+               countEl.textContent = ''; exportBtn.classList.add('hidden');
+            } else {
+               let html = '';
+               currentRetireeResults.forEach(row => {
+                  html += `<tr class="bg-white border-b hover:bg-red-50"><td class="px-6 py-4 font-medium">${escapeHtml(row.name)}</td><td class="px-6 py-4 text-gray-500">${escapeHtml(row.position)}</td><td class="px-6 py-4 text-center">${escapeHtml(row.region)}</td><td class="px-6 py-4 text-blue-600">${escapeHtml(row.hospital)}</td><td class="px-6 py-4 text-gray-500 text-sm">${escapeHtml(row.type)}</td></tr>`;
+               });
+               tbody.innerHTML = html;
+               countEl.textContent = `พบผู้เกษียณ ${fmtNum(currentRetireeResults.length)} คน`;
+               exportBtn.classList.remove('hidden');
+            }
+         })
+         .catch(err => { Swal.fire('เกิดข้อผิดพลาดในการเชื่อมต่อ', (err && err.message) ? err.message : 'กรุณาลองใหม่อีกครั้ง', 'error'); });
+    }
+
+    function exportRetireesToExcel() {
+       if (!currentRetireeResults.length) return;
+       const header = ['ชื่อ-สกุล', 'ตำแหน่ง', 'เขตสุขภาพ', 'โรงพยาบาล', 'ประเภทบุคลากร'];
+       const rows = currentRetireeResults.map(r => [ r.name, r.position, 'เขต ' + r.region, r.hospital, r.type ]);
+       const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+       ws['!cols'] = [{ wch: 28 }, { wch: 28 }, { wch: 10 }, { wch: 30 }, { wch: 20 }];
+       const wb = XLSX.utils.book_new();
+       XLSX.utils.book_append_sheet(wb, ws, 'ผู้เกษียณอายุ');
+       XLSX.writeFile(wb, `ผู้เกษียณอายุราชการ_ปีงบประมาณ_${currentRetireeYear}.xlsx`);
+    }
+  </script>
 </body>
 </html>
