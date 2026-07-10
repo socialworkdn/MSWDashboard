@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Dashboard นักสังคมสงเคราะห์ทางการแพทย์</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -14,6 +15,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap');
     body { font-family: 'Sarabun', sans-serif; background-color: #f3f4f6; }
@@ -32,7 +34,7 @@
     <div class="container mx-auto px-4 py-3 flex justify-between items-center flex-wrap gap-2">
       <div class="flex items-center space-x-3">
         <div class="bg-white p-1 rounded-full shadow-md">
-           <img src="https://img1.pic.in.th/images/Seal.png" alt="MOPH Logo" class="h-9 w-9 object-contain">
+           <img src="https://img5.pic.in.th/file/secure-sv1/logo-MOPH270452adfe737af2.png" alt="MOPH Logo" class="h-9 w-9 object-contain">
         </div>
         <div>
           <h1 class="text-xl font-bold">Dashboard นักสังคมสงเคราะห์ทางการแพทย์</h1>
@@ -48,6 +50,7 @@
          </a>
       </div>
     </div>
+
     <div class="bg-black/20 text-white border-t border-white/10">
       <div class="container mx-auto flex overflow-x-auto">
         <button onclick="switchView('overview')" id="btn-overview" class="nav-link active px-6 py-3 whitespace-nowrap hover:bg-white/10"><i class="fas fa-chart-bar mr-2"></i>ภาพรวมสถิติ</button>
@@ -78,8 +81,9 @@
   </div>
 
   <div id="mainContent" class="hidden container mx-auto px-4 py-8 pb-20">
-    <!-- View: Overview -->
+
     <div id="view-overview" class="view-section">
+
        <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-teal-500 pl-3">ข้อมูลโรงพยาบาล</h3>
        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
            <div class="bg-white p-6 rounded-xl shadow border-t-4 border-teal-600 flex flex-col justify-center items-center">
@@ -89,7 +93,9 @@
            </div>
            <div class="md:col-span-2 bg-white p-4 rounded-xl shadow border border-gray-100">
                <div class="font-bold text-gray-600 mb-2 text-center">สัดส่วนแยกตามระดับโรงพยาบาล</div>
-               <div class="chart-container" style="height: 250px;"><canvas id="chartHospitals"></canvas></div>
+               <div class="chart-container" style="height: 250px;">
+                   <canvas id="chartHospitals"></canvas>
+               </div>
            </div>
        </div>
 
@@ -97,31 +103,54 @@
        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div class="grid grid-cols-2 gap-4 md:col-span-2">
               <div class="card-stat bg-white p-4 rounded-xl shadow border-l-4 border-blue-500">
-                 <div class="text-gray-500 text-xs">ผู้ปฏิบัติงานทั้งหมด</div><div class="text-2xl font-bold text-blue-700" id="statTotal">0</div><div class="text-xs text-gray-400 mt-1">คน</div>
+                 <div class="text-gray-500 text-xs">ผู้ปฏิบัติงานทั้งหมด</div>
+                 <div class="text-2xl font-bold text-blue-700" id="statTotal">0</div>
+                 <div class="text-xs text-gray-400 mt-1">คน</div>
               </div>
               <div class="card-stat bg-white p-4 rounded-xl shadow border-l-4 border-green-500">
-                 <div class="text-gray-500 text-xs">ข้าราชการ</div><div id="statCivil" class="text-2xl font-bold text-green-700">0</div>
-              </div>
+                 <div class="text-gray-500 text-xs">ข้าราชการ</div>
+                 <div id="statCivil" class="text-2xl font-bold text-green-700">0</div>
+                 </div>
               <div class="card-stat bg-white p-4 rounded-xl shadow border-l-4 border-purple-500">
-                 <div class="text-gray-500 text-xs">พนักงาน/ลูกจ้าง</div><div id="statOtherEmp" class="text-2xl font-bold text-purple-700">0</div>
-              </div>
+                 <div class="text-gray-500 text-xs">พนักงาน/ลูกจ้าง</div>
+                 <div id="statOtherEmp" class="text-2xl font-bold text-purple-700">0</div>
+                 </div>
               <div class="card-stat bg-white p-4 rounded-xl shadow border-l-4 border-red-500">
-                 <div class="text-gray-500 text-xs">ตำแหน่งว่าง</div><div id="statVacancy" class="text-2xl font-bold text-red-700">0</div>
-              </div>
+                 <div class="text-gray-500 text-xs">ตำแหน่งว่าง</div>
+                 <div id="statVacancy" class="text-2xl font-bold text-red-700">0</div>
+                 </div>
           </div>
           <div class="bg-white p-4 rounded-xl shadow border border-gray-100">
               <div class="font-bold text-gray-600 mb-2 text-center">ภาพรวมสถานะอัตรากำลัง</div>
-              <div class="chart-container" style="height: 200px;"><canvas id="chartWorkforce"></canvas></div>
+              <div class="chart-container" style="height: 200px;">
+                  <canvas id="chartWorkforce"></canvas>
+              </div>
           </div>
        </div>
 
        <div class="bg-white rounded-xl shadow p-6 border border-red-100 mb-8">
            <div class="text-gray-700 font-bold mb-4"><i class="fas fa-exclamation-circle text-red-500"></i> รายละเอียดตำแหน่งว่างแยกตามประเภท</div>
            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
-               <div class="p-2"><div class="text-xs text-gray-500">ข้าราชการ</div><div class="text-xl font-bold text-gray-800" id="vacCivil">0</div><div class="w-full bg-gray-200 rounded-full h-1.5 mt-2"><div class="bg-red-500 h-1.5 rounded-full" id="barVacCivil" style="width: 0%"></div></div></div>
-               <div class="p-2"><div class="text-xs text-gray-500">พนักงานราชการ</div><div class="text-xl font-bold text-gray-800" id="vacGov">0</div><div class="w-full bg-gray-200 rounded-full h-1.5 mt-2"><div class="bg-orange-500 h-1.5 rounded-full" id="barVacGov" style="width: 0%"></div></div></div>
-               <div class="p-2"><div class="text-xs text-gray-500">พนักงานกระทรวงสาธารณสุข</div><div class="text-xl font-bold text-gray-800" id="vacMoph">0</div><div class="w-full bg-gray-200 rounded-full h-1.5 mt-2"><div class="bg-yellow-500 h-1.5 rounded-full" id="barVacMoph" style="width: 0%"></div></div></div>
-               <div class="p-2"><div class="text-xs text-gray-500">ลูกจ้างชั่วคราว</div><div class="text-xl font-bold text-gray-800" id="vacTemp">0</div><div class="w-full bg-gray-200 rounded-full h-1.5 mt-2"><div class="bg-blue-400 h-1.5 rounded-full" id="barVacTemp" style="width: 0%"></div></div></div>
+               <div class="p-2">
+                   <div class="text-xs text-gray-500">ข้าราชการ</div>
+                   <div class="text-xl font-bold text-gray-800" id="vacCivil">0</div>
+                   <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2"><div class="bg-red-500 h-1.5 rounded-full" id="barVacCivil" style="width: 0%"></div></div>
+               </div>
+               <div class="p-2">
+                   <div class="text-xs text-gray-500">พนักงานราชการ</div>
+                   <div class="text-xl font-bold text-gray-800" id="vacGov">0</div>
+                   <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2"><div class="bg-orange-500 h-1.5 rounded-full" id="barVacGov" style="width: 0%"></div></div>
+               </div>
+               <div class="p-2">
+                   <div class="text-xs text-gray-500">พนักงานกระทรวงสาธารณสุข</div>
+                   <div class="text-xl font-bold text-gray-800" id="vacMoph">0</div>
+                   <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2"><div class="bg-yellow-500 h-1.5 rounded-full" id="barVacMoph" style="width: 0%"></div></div>
+               </div>
+               <div class="p-2">
+                   <div class="text-xs text-gray-500">ลูกจ้างชั่วคราว</div>
+                   <div class="text-xl font-bold text-gray-800" id="vacTemp">0</div>
+                   <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2"><div class="bg-blue-400 h-1.5 rounded-full" id="barVacTemp" style="width: 0%"></div></div>
+               </div>
            </div>
        </div>
 
@@ -129,16 +158,21 @@
        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           <div class="bg-white rounded-lg shadow p-4">
              <div class="font-bold text-gray-600 mb-2 text-center">กราฟแสดงจำนวนแยกตามระดับ (%)</div>
-             <div class="chart-container" style="height: 300px;"><canvas id="chartPositions"></canvas></div>
+             <div class="chart-container" style="height: 300px;">
+                 <canvas id="chartPositions"></canvas>
+             </div>
           </div>
           <div class="bg-white rounded-lg shadow overflow-hidden h-full">
              <div class="bg-gray-50 px-4 py-3 border-b font-bold text-gray-700 text-sm">ตารางสรุปจำนวนและร้อยละ</div>
-             <table class="min-w-full divide-y divide-gray-200"><tbody class="divide-y divide-gray-200" id="tablePositions"></tbody></table>
+             <table class="min-w-full divide-y divide-gray-200">
+                <tbody class="divide-y divide-gray-200" id="tablePositions"></tbody>
+             </table>
           </div>
        </div>
 
        <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-orange-500 pl-3">สถิติระยะเวลาและประสบการณ์</h3>
        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
           <div class="bg-white rounded-xl shadow p-5 border border-gray-100">
              <div class="text-orange-600 font-bold mb-3 text-sm"><i class="fas fa-hourglass-half mr-2"></i>อายุงาน</div>
              <div class="grid grid-cols-3 gap-2 text-center divide-x">
@@ -147,16 +181,18 @@
                 <div><div class="text-xs text-gray-400">เฉลี่ย</div><div id="tenureAvg" class="font-bold text-lg text-orange-600">0</div><span class="text-xs">ปี</span></div>
              </div>
           </div>
+
           <div class="bg-white rounded-xl shadow p-5 border-t-4 border-blue-500 relative overflow-hidden">
-             <div class="text-blue-800 font-bold mb-3 text-sm"><i class="fas fa-briefcase-medical mr-2"></i>ประสบการณ์การแพทย์</div>
+             <div class="text-blue-800 font-bold mb-3 text-sm"><i class="fas fa-briefcase-medical mr-2"></i>ประสบการณ์การแพทย์ (ทั้งหมด)</div>
              <div class="grid grid-cols-3 gap-2 text-center divide-x">
                 <div><div class="text-xs text-gray-400">ต่ำสุด</div><div id="expMin" class="font-bold text-lg">0</div><span class="text-xs">ปี</span></div>
                 <div><div class="text-xs text-gray-400">สูงสุด</div><div id="expMax" class="font-bold text-lg">0</div><span class="text-xs">ปี</span></div>
                 <div><div class="text-xs text-gray-400">เฉลี่ย</div><div id="expAvg" class="font-bold text-lg text-blue-600">0</div><span class="text-xs">ปี</span></div>
              </div>
           </div>
+
           <div class="bg-white rounded-xl shadow p-5 border border-gray-100">
-             <div class="text-indigo-600 font-bold mb-3 text-sm"><i class="fas fa-layer-group mr-2"></i>เวลาในระดับปัจจุบัน</div>
+             <div class="text-indigo-600 font-bold mb-3 text-sm"><i class="fas fa-layer-group mr-2"></i>ระยะเวลาที่อยู่ในระดับปัจจุบัน</div>
              <div class="grid grid-cols-3 gap-2 text-center divide-x">
                 <div><div class="text-xs text-gray-400">ต่ำสุด</div><div id="levelMin" class="font-bold text-lg">0</div><span class="text-xs">ปี</span></div>
                 <div><div class="text-xs text-gray-400">สูงสุด</div><div id="levelMax" class="font-bold text-lg">0</div><span class="text-xs">ปี</span></div>
@@ -173,6 +209,7 @@
                  <div>ไม่มี: <span class="font-bold text-lg text-red-600 ml-2" id="statNoDegree">0</span></div>
              </div>
           </div>
+
           <div class="bg-white rounded-xl shadow overflow-hidden">
              <div class="grid grid-cols-2 h-full">
                  <div class="border-r p-4">
@@ -186,10 +223,8 @@
              </div>
           </div>
        </div>
-    </div> 
 
-    <!-- View: Database -->
-    <div id="view-database" class="view-section hidden">
+    </div> <div id="view-database" class="view-section hidden">
        <div class="bg-white p-6 rounded-xl shadow border border-blue-100">
           <div class="flex justify-between items-center mb-4">
              <h2 class="text-xl font-bold text-moph"><i class="fas fa-database mr-2"></i> ฐานข้อมูลนักสังคมสงเคราะห์ทั้งหมด</h2>
@@ -206,7 +241,6 @@
        </div>
     </div>
 
-    <!-- View: Retiree -->
     <div id="view-retiree" class="view-section hidden">
        <div class="bg-white p-8 rounded-xl shadow max-w-5xl mx-auto">
           <h2 class="text-2xl font-bold text-red-700 mb-6 text-center"><i class="fas fa-user-clock mr-2"></i> ตรวจสอบผู้เกษียณอายุราชการ</h2>
@@ -216,12 +250,22 @@
                 <input type="number" id="fiscalYear" value="2569" class="border p-2 rounded w-32 text-center text-lg font-bold text-red-600">
              </div>
              <button onclick="calcRetirees()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg shadow font-bold h-full">ค้นหา</button>
-             <button id="btnExportRetirees" onclick="exportRetireesToExcel()" class="hidden bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow font-bold h-full"><i class="fas fa-file-excel mr-2"></i> Export Excel</button>
+             <button id="btnExportRetirees" onclick="exportRetireesToExcel()" class="hidden bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow font-bold h-full">
+                <i class="fas fa-file-excel mr-2"></i> Export Excel
+             </button>
           </div>
           <div id="retireeCount" class="text-sm text-gray-500 mb-2"></div>
           <div class="overflow-x-auto">
              <table class="min-w-full divide-y divide-gray-200">
-                <thead><tr class="bg-red-600 text-white text-left text-sm"><th class="px-6 py-3">ชื่อ-สกุล</th><th class="px-6 py-3">ตำแหน่ง</th><th class="px-6 py-3">เขตสุขภาพ</th><th class="px-6 py-3">โรงพยาบาล</th><th class="px-6 py-3">ประเภทบุคลากร</th></tr></thead>
+                <thead>
+                   <tr class="bg-red-600 text-white text-left text-sm">
+                      <th class="px-6 py-3">ชื่อ-สกุล</th>
+                      <th class="px-6 py-3">ตำแหน่ง</th>
+                      <th class="px-6 py-3">เขตสุขภาพ</th>
+                      <th class="px-6 py-3">โรงพยาบาล</th>
+                      <th class="px-6 py-3">ประเภทบุคลากร</th>
+                   </tr>
+                </thead>
                 <tbody id="retireTableBody" class="bg-white divide-y divide-gray-200"></tbody>
              </table>
           </div>
@@ -231,35 +275,75 @@
   </div>
 
   <script>
-    // ==========================================
-    // API CONFIGURATION (แก้ไข URL ด้านล่างนี้)
-    // ==========================================
-    const API_URL = 'https://script.google.com/macros/s/AKfycbyJH9OAbEB8L6RlG1OW81f8znc8n4kUiBvXDRR49LkHF-d_E5r7b7brEWQHQN3uqSkL/exec'; 
+    // ==========================================================
+    //  เชื่อมต่อ Google Apps Script Web App (JSON API) แทน google.script.run เดิม
+    //  ต้องรันบนหน้าเว็บสาธารณะ (เช่น GitHub Pages) เพราะไฟล์นี้ไม่ได้ถูกเสิร์ฟจาก Apps Script อีกต่อไป
+    // ==========================================================
+    const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbyJH9OAbEB8L6RlG1OW81f8znc8n4kUiBvXDRR49LkHF-d_E5r7b7brEWQHQN3uqSkL/exec'; // TODO: แก้เป็น URL Web App ของท่านหลัง Deploy
 
-    async function apiCall(action, payload = {}) {
-        payload.action = action;
-        try {
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload)
-            });
-            return await response.json();
-        } catch (error) {
-            console.error("API Error:", error);
-            throw error;
-        }
+    function callApi(action, args) {
+      return fetch(API_BASE_URL, {
+        method: 'POST',
+        // ใช้ text/plain เพื่อให้เบราว์เซอร์ไม่ส่ง CORS preflight (OPTIONS) ซึ่ง Apps Script ไม่รองรับ
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: action, args: args || [] })
+      }).then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      });
     }
+
+    /**
+     * shim จำลอง google.script.run ของ Apps Script HtmlService ให้ทำงานผ่าน fetch() แทน
+     * ทำให้โค้ดเดิมที่เขียนแบบ google.script.run.withSuccessHandler(...).withFailureHandler(...).ฟังก์ชัน(args)
+     * ใช้งานได้เหมือนเดิมทุกจุด โดยไม่ต้องแก้โค้ดส่วน UI logic ด้านล่างเลย
+     */
+    function createGasRunProxy() {
+      let successFn = null;
+      let failureFn = null;
+      const proxy = new Proxy({}, {
+        get: function (target, prop) {
+          if (prop === 'withSuccessHandler') {
+            return function (fn) { successFn = fn; return proxy; };
+          }
+          if (prop === 'withFailureHandler') {
+            return function (fn) { failureFn = fn; return proxy; };
+          }
+          // การเข้าถึง property อื่นใดถือเป็นชื่อฟังก์ชัน server-side ที่ต้องการเรียก
+          return function () {
+            const args = Array.prototype.slice.call(arguments);
+            callApi(String(prop), args)
+              .then(function (result) { if (successFn) successFn(result); })
+              .catch(function (err) { if (failureFn) failureFn(err); else console.error('[API Error]', err); });
+          };
+        }
+      });
+      return proxy;
+    }
+
+    window.google = {
+      script: {
+        get run() { return createGasRunProxy(); }
+      }
+    };
+    // ==========================================================
 
     Chart.register(ChartDataLabels);
     let rawData = { personnel: [], hospitals: [] };
     let charts = { hosp: null, work: null, pos: null };
 
+    // --- ป้องกัน XSS: escape ข้อมูลก่อนแสดงผลใน innerHTML ---
     function escapeHtml(str) {
        if (str === null || str === undefined) return '';
-       return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+       return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
     }
 
+    // --- คำนวณปีงบประมาณปัจจุบันอัตโนมัติ (พ.ศ.) แทนการ hardcode ---
     function currentFiscalYearBE() {
        const now = new Date();
        const beYear = now.getFullYear() + 543;
@@ -271,16 +355,18 @@
        loadData();
     };
 
-    function fmtNum(n) { return (n || 0).toLocaleString('th-TH'); }
+    function fmtNum(n) {
+       return (n || 0).toLocaleString('th-TH');
+    }
 
     function loadData(forceRefresh) {
-       apiCall('getDashboardDataPackage', { forceRefresh: !!forceRefresh })
-          .then(res => {
+       google.script.run
+          .withSuccessHandler(res => {
              document.getElementById('loading').classList.add('hidden');
              const refreshIcon = document.querySelector('#btnRefresh i');
              if(refreshIcon) refreshIcon.classList.remove('fa-spin-fast');
 
-             if(res.error) { Swal.fire('ข้อผิดพลาด', res.message || 'ไม่สามารถโหลดข้อมูลได้', 'error'); }
+             if(res.error) { Swal.fire('ข้อผิดพลาด', res.message, 'error'); }
              else {
                 rawData = res;
                 document.getElementById('mainContent').classList.remove('hidden');
@@ -293,17 +379,18 @@
                 renderFullTable();
              }
           })
-          .catch(err => {
+          .withFailureHandler(err => {
              document.getElementById('loading').classList.add('hidden');
              Swal.fire('เกิดข้อผิดพลาดในการเชื่อมต่อ', (err && err.message) ? err.message : 'กรุณาลองใหม่อีกครั้ง', 'error');
-          });
+          })
+          .getDashboardDataPackage(!!forceRefresh);
     }
 
     function refreshData() {
         document.getElementById('loading').classList.remove('hidden');
         document.getElementById('mainContent').classList.add('hidden');
         document.querySelector('#btnRefresh i').classList.add('fa-spin-fast');
-        loadData(true); 
+        loadData(true); // บังคับข้าม cache เพื่อดึงข้อมูลล่าสุดจริง ๆ
     }
 
     function switchView(viewName) {
@@ -313,17 +400,22 @@
        document.getElementById('btn-'+viewName).classList.add('active');
     }
 
+    // Helper: Calculate Percentage String
     const calcPct = (val, total) => (total > 0 ? ((val / total) * 100).toFixed(1) : 0) + '%';
 
     function renderDashboard() {
        const region = document.getElementById('regionFilter').value;
-       let pData = rawData.personnel; if(region !== 'all') pData = pData.filter(r => r[1] == region);
-       let hData = rawData.hospitals; if(region !== 'all') hData = hData.filter(h => h[2] == region);
+
+       let pData = rawData.personnel;
+       if(region !== 'all') pData = pData.filter(r => r[1] == region);
+
+       let hData = rawData.hospitals;
+       if(region !== 'all') hData = hData.filter(h => h[2] == region);
 
        document.getElementById('statHospTotal').innerText = fmtNum(hData.length);
        renderHospitalChart(hData);
 
-       const total = pData.length;
+       const total = pData.length; // จำนวนคนที่มีอยู่จริง (Headcount)
        const civil = pData.filter(r => r[20] == 'ข้าราชการ').length;
        const govEmp = pData.filter(r => ['พนักงานราชการ','พนักงานกระทรวงสาธารณสุข','ลูกจ้างชั่วคราว'].includes(r[20])).length;
 
@@ -333,11 +425,16 @@
            vacMoph += (parseInt(h[9])||0); vacTemp += (parseInt(h[10])||0);
        });
        let totalVac = vacCivil + vacGov + vacMoph + vacTemp;
-       let totalFrame = total + totalVac; 
+       let totalFrame = total + totalVac; // กรอบอัตรากำลังรวม (คนที่มี + ตำแหน่งว่าง)
 
        document.getElementById('statTotal').innerText = fmtNum(total);
+
+       // --- การคำนวณ % ---
+       // 1. ข้าราชการ และ พนักงาน: เทียบกับ "จำนวนคนที่มีอยู่จริง" (Total)
        document.getElementById('statCivil').innerHTML = `${fmtNum(civil)} <span class="text-sm font-normal text-gray-500">(${calcPct(civil, total)})</span>`;
        document.getElementById('statOtherEmp').innerHTML = `${fmtNum(govEmp)} <span class="text-sm font-normal text-gray-500">(${calcPct(govEmp, total)})</span>`;
+
+       // 2. ตำแหน่งว่าง: เทียบกับ "กรอบอัตรากำลังรวม" (Total Frame)
        document.getElementById('statVacancy').innerHTML = `${fmtNum(totalVac)} <span class="text-sm font-normal text-red-400">(${calcPct(totalVac, totalFrame)})</span>`;
 
        document.getElementById('vacCivil').innerText = fmtNum(vacCivil); document.getElementById('barVacCivil').style.width = (totalVac?vacCivil/totalVac*100:0) + "%";
@@ -347,7 +444,15 @@
 
        renderWorkforceChart(civil, govEmp, totalVac);
 
-       const posCounts = { 'นักสังคมสงเคราะห์เชี่ยวชาญ': 0, 'นักสังคมสงเคราะห์ชำนาญการพิเศษ': 0, 'นักสังคมสงเคราะห์ชำนาญการ': 0, 'นักสังคมสงเคราะห์ปฏิบัติการ': 0, 'นักสังคมสงเคราะห์': 0, 'อื่น ๆ': 0 };
+       // --- Position Stats ---
+       const posCounts = {
+           'นักสังคมสงเคราะห์เชี่ยวชาญ': 0,
+           'นักสังคมสงเคราะห์ชำนาญการพิเศษ': 0,
+           'นักสังคมสงเคราะห์ชำนาญการ': 0,
+           'นักสังคมสงเคราะห์ปฏิบัติการ': 0,
+           'นักสังคมสงเคราะห์': 0,
+           'อื่น ๆ': 0
+       };
        pData.forEach(r => {
            let pos = r[15] || '';
            if(pos.includes('เชี่ยวชาญ')) posCounts['นักสังคมสงเคราะห์เชี่ยวชาญ']++;
@@ -368,14 +473,24 @@
        }
        document.getElementById('tablePositions').innerHTML = posHtml;
 
+       // --- 5. Stats ---
        const tenureStats = calcTimeStats(pData, 16);
        const levelStats = calcTimeStats(pData, 18);
        const expStats = calcNumericStats(pData, 31);
 
-       document.getElementById('tenureMin').innerText = tenureStats.min; document.getElementById('tenureMax').innerText = tenureStats.max; document.getElementById('tenureAvg').innerText = tenureStats.avg;
-       document.getElementById('levelMin').innerText = levelStats.min; document.getElementById('levelMax').innerText = levelStats.max; document.getElementById('levelAvg').innerText = levelStats.avg;
-       document.getElementById('expMin').innerText = expStats.min; document.getElementById('expMax').innerText = expStats.max; document.getElementById('expAvg').innerText = expStats.avg;
+       document.getElementById('tenureMin').innerText = tenureStats.min;
+       document.getElementById('tenureMax').innerText = tenureStats.max;
+       document.getElementById('tenureAvg').innerText = tenureStats.avg;
 
+       document.getElementById('levelMin').innerText = levelStats.min;
+       document.getElementById('levelMax').innerText = levelStats.max;
+       document.getElementById('levelAvg').innerText = levelStats.avg;
+
+       document.getElementById('expMin').innerText = expStats.min;
+       document.getElementById('expMax').innerText = expStats.max;
+       document.getElementById('expAvg').innerText = expStats.avg;
+
+       // Education % (เทียบกับคนที่มีอยู่จริง)
        const hasDeg = pData.filter(r => r[24] == 'มี').length;
        const noDeg = pData.filter(r => r[24] == 'ไม่มี').length;
        document.getElementById('statHasDegree').innerHTML = `${fmtNum(hasDeg)} <span class="text-xs text-green-500 font-normal">(${calcPct(hasDeg, total)})</span>`;
@@ -397,8 +512,25 @@
         if(charts.hosp) charts.hosp.destroy();
         charts.hosp = new Chart(ctx, {
             type: 'doughnut',
-            data: { labels: Object.keys(counts), datasets: [{ data: Object.values(counts), backgroundColor: ['#2dd4bf', '#0d9488', '#115e59', '#14b8a6', '#99f6e4', '#ccfbf1'] }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' }, datalabels: { color: '#fff', formatter: (v, ctx) => { let s=0; ctx.chart.data.datasets[0].data.map(d=>{s+=d}); return (v*100/s).toFixed(1)+"%"; } } } }
+            data: {
+                labels: Object.keys(counts),
+                datasets: [{ data: Object.values(counts), backgroundColor: ['#2dd4bf', '#0d9488', '#115e59', '#14b8a6', '#99f6e4', '#ccfbf1'] }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right' },
+                    datalabels: {
+                        color: '#fff',
+                        formatter: (value, ctx) => {
+                            let sum = 0;
+                            let dataArr = ctx.chart.data.datasets[0].data;
+                            dataArr.map(data => { sum += data; });
+                            return (value*100 / sum).toFixed(1)+"%";
+                        }
+                    }
+                }
+            }
         });
     }
 
@@ -407,8 +539,25 @@
         if(charts.work) charts.work.destroy();
         charts.work = new Chart(ctx, {
             type: 'bar',
-            data: { labels: ['ข้าราชการ', 'พนักงาน/ลูกจ้าง', 'ตำแหน่งว่าง'], datasets: [{ label: 'จำนวน', data: [civil, other, vac], backgroundColor: ['#22c55e', '#a855f7', '#ef4444'], borderRadius: 5 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', formatter: (v, ctx) => { let s=0; ctx.chart.data.datasets[0].data.map(d=>{s+=d}); return v+" ("+(v*100/s).toFixed(1)+"%)"; } } } }
+            data: {
+                labels: ['ข้าราชการ', 'พนักงาน/ลูกจ้าง', 'ตำแหน่งว่าง'],
+                datasets: [{ label: 'จำนวน', data: [civil, other, vac], backgroundColor: ['#22c55e', '#a855f7', '#ef4444'], borderRadius: 5 }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    datalabels: {
+                        anchor: 'end', align: 'top',
+                        formatter: (value, ctx) => {
+                            let sum = 0;
+                            let dataArr = ctx.chart.data.datasets[0].data;
+                            dataArr.map(data => { sum += data; });
+                            return value + " (" + (value*100 / sum).toFixed(1) + "%)";
+                        }
+                    }
+                }
+            }
         });
     }
 
@@ -417,15 +566,33 @@
         if(charts.pos) charts.pos.destroy();
         charts.pos = new Chart(ctx, {
             type: 'bar',
-            data: { labels: Object.keys(counts), datasets: [{ label: 'จำนวน', data: Object.values(counts), backgroundColor: '#6366f1', borderRadius: 4 }] },
-            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'right', formatter: (v, ctx) => { let s=0; ctx.chart.data.datasets[0].data.map(d=>{s+=d}); return v>0?(v*100/s).toFixed(1)+"%":""; } } } }
+            data: {
+                labels: Object.keys(counts),
+                datasets: [{ label: 'จำนวน', data: Object.values(counts), backgroundColor: '#6366f1', borderRadius: 4 }]
+            },
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    datalabels: {
+                        anchor: 'end', align: 'right',
+                        formatter: (value, ctx) => {
+                            let sum = 0;
+                            let dataArr = ctx.chart.data.datasets[0].data;
+                            dataArr.map(data => { sum += data; });
+                            return value > 0 ? (value*100 / sum).toFixed(1) + "%" : "";
+                        }
+                    }
+                }
+            }
         });
     }
 
     function renderMiniTable(id, idx, colorMap, data) {
         let counts = {}; for(let k in colorMap) counts[k] = 0;
         data.forEach(r => { for(let k in colorMap) if(String(r[idx]).includes(k)) counts[k]++; });
-        let html = ''; let total = data.length;
+        let html = '';
+        let total = data.length;
         for(let [k, css] of Object.entries(colorMap)) {
             let pct = total > 0 ? ((counts[k]/total)*100).toFixed(1) + '%' : '0%';
             html += `<div class="flex justify-between items-center"><span class="${css}">${escapeHtml(k)}</span><div><span class="font-bold mr-1">${fmtNum(counts[k])}</span><span class="text-xs text-gray-400">(${pct})</span></div></div>`;
@@ -435,7 +602,11 @@
 
     function calcTimeStats(data, dateIdx) {
         const now = new Date();
-        let years = data.map(r => { let d = new Date(r[dateIdx]); if (!isNaN(d.getTime())) return Math.abs(now - d)/(1000*60*60*24*365.25); return null; }).filter(y => y !== null);
+        let years = data.map(r => {
+            let d = new Date(r[dateIdx]);
+            if (!isNaN(d.getTime())) return Math.abs(now - d)/(1000 * 60 * 60 * 24 * 365.25);
+            return null;
+        }).filter(y => y !== null);
         if (years.length === 0) return { min: 0, max: 0, avg: 0 };
         let min = Math.min(...years); let max = Math.max(...years); let sum = years.reduce((a, b) => a + b, 0);
         return { min: min.toFixed(1), max: max.toFixed(1), avg: (sum / years.length).toFixed(1) };
@@ -444,22 +615,30 @@
     function calcNumericStats(data, idx) {
         let values = data.map(r => parseFloat(r[idx])).filter(v => !isNaN(v));
         if (values.length === 0) return { min: 0, max: 0, avg: 0 };
-        let min = Math.min(...values); let max = Math.max(...values); let sum = values.reduce((a, b) => a + b, 0);
+        let min = Math.min(...values);
+        let max = Math.max(...values);
+        let sum = values.reduce((a, b) => a + b, 0);
         return { min: min, max: max, avg: (sum / values.length).toFixed(1) };
     }
 
     function renderFullTable() {
        const now = new Date();
        const rows = rawData.personnel.map(r => {
-           let tenure = 0; if(r[16]) tenure = ((now - new Date(r[16])) / (1000 * 60 * 60 * 24 * 365.25)).toFixed(1);
+           let tenure = 0;
+           if(r[16]) tenure = ((now - new Date(r[16])) / (1000 * 60 * 60 * 24 * 365.25)).toFixed(1);
            const licenseStatus = r[28];
            const badgeClass = licenseStatus=='มี' ? 'bg-green-100 text-green-800' : (licenseStatus=='หมดอายุ' ? 'bg-orange-100 text-orange-800' : 'bg-red-100 text-red-800');
-           return [ escapeHtml(r[1]), escapeHtml(r[4]), escapeHtml(`${r[8]}${r[9]} ${r[10]}`), escapeHtml(r[15]), tenure, `<span class="px-2 py-0.5 rounded text-xs ${badgeClass}">${escapeHtml(licenseStatus)}</span>`, `<span class="text-xs text-gray-500">${escapeHtml(r[20])}</span>` ];
+           return [
+              escapeHtml(r[1]), escapeHtml(r[4]), escapeHtml(`${r[8]}${r[9]} ${r[10]}`), escapeHtml(r[15]), tenure,
+              `<span class="px-2 py-0.5 rounded text-xs ${badgeClass}">${escapeHtml(licenseStatus)}</span>`,
+              `<span class="text-xs text-gray-500">${escapeHtml(r[20])}</span>`
+           ];
        });
        $('#fullTable').DataTable({
           data: rows, responsive: true, destroy: true,
           columns: [{ title: "เขต" }, { title: "โรงพยาบาล" }, { title: "ชื่อ-สกุล" }, { title: "ตำแหน่ง" }, { title: "อายุงาน" }, { title: "ใบประกอบฯ" }, { title: "สถานะ" }],
-          pageLength: 10, language: { search: "ค้นหา:", lengthMenu: "แสดง _MENU_ รายการ", info: "แสดง _START_ ถึง _END_ จาก _TOTAL_ รายการ", paginate: { next: "ถัดไป", previous: "ก่อนหน้า" } }
+          pageLength: 10,
+          language: { search: "ค้นหา:", lengthMenu: "แสดง _MENU_ รายการ", info: "แสดง _START_ ถึง _END_ จาก _TOTAL_ รายการ", paginate: { next: "ถัดไป", previous: "ก่อนหน้า" } }
        });
     }
 
@@ -469,8 +648,8 @@
     function calcRetirees() {
        const year = parseInt(document.getElementById('fiscalYear').value);
        currentRetireeYear = year;
-       apiCall('checkRetirees', { year: year })
-         .then(res => {
+       google.script.run
+         .withSuccessHandler(res => {
             if(res.error) { Swal.fire('เกิดข้อผิดพลาด', res.error, 'error'); return; }
             currentRetireeResults = res.data || [];
             const tbody = document.getElementById('retireTableBody');
@@ -479,7 +658,8 @@
 
             if(currentRetireeResults.length === 0) {
                tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-500">ไม่พบผู้เกษียณในปีงบประมาณนี้</td></tr>';
-               countEl.textContent = ''; exportBtn.classList.add('hidden');
+               countEl.textContent = '';
+               exportBtn.classList.add('hidden');
             } else {
                let html = '';
                currentRetireeResults.forEach(row => {
@@ -490,18 +670,28 @@
                exportBtn.classList.remove('hidden');
             }
          })
-         .catch(err => { Swal.fire('เกิดข้อผิดพลาดในการเชื่อมต่อ', (err && err.message) ? err.message : 'กรุณาลองใหม่อีกครั้ง', 'error'); });
+         .withFailureHandler(err => {
+            Swal.fire('เกิดข้อผิดพลาดในการเชื่อมต่อ', (err && err.message) ? err.message : 'กรุณาลองใหม่อีกครั้ง', 'error');
+         })
+         .checkRetirees(year);
     }
 
     function exportRetireesToExcel() {
        if (!currentRetireeResults.length) return;
+
        const header = ['ชื่อ-สกุล', 'ตำแหน่ง', 'เขตสุขภาพ', 'โรงพยาบาล', 'ประเภทบุคลากร'];
-       const rows = currentRetireeResults.map(r => [ r.name, r.position, 'เขต ' + r.region, r.hospital, r.type ]);
+       const rows = currentRetireeResults.map(r => [
+          r.name, r.position, 'เขต ' + r.region, r.hospital, r.type
+       ]);
+
        const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
        ws['!cols'] = [{ wch: 28 }, { wch: 28 }, { wch: 10 }, { wch: 30 }, { wch: 20 }];
+
        const wb = XLSX.utils.book_new();
        XLSX.utils.book_append_sheet(wb, ws, 'ผู้เกษียณอายุ');
-       XLSX.writeFile(wb, `ผู้เกษียณอายุราชการ_ปีงบประมาณ_${currentRetireeYear}.xlsx`);
+
+       const fileName = `ผู้เกษียณอายุราชการ_ปีงบประมาณ_${currentRetireeYear}.xlsx`;
+       XLSX.writeFile(wb, fileName);
     }
   </script>
 </body>
