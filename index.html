@@ -2,6 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
   <title>Dashboard นักสังคมสงเคราะห์ทางการแพทย์</title><link rel="icon" type="image/png" href="https://img1.pic.in.th/images/Sealccd991036c7517c8.png">
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -31,43 +32,43 @@
 <body>
 
   <nav id="navbar" class="bg-moph text-white shadow-lg sticky top-0 z-50">
-    <div class="container mx-auto px-4 py-3 flex justify-between items-center flex-wrap gap-2">
-      <div class="flex items-center space-x-3">
-        <div class="bg-white p-1 rounded-full shadow-md">
-           <img src="https://img1.pic.in.th/images/Sealccd991036c7517c8.png" alt="MOPH Logo" class="h-9 w-9 object-contain">
+    <div class="container mx-auto px-3 sm:px-4 py-3 flex justify-between items-center flex-wrap gap-2">
+      <div class="flex items-center space-x-3 min-w-0">
+        <div class="bg-white p-1 rounded-full shadow-md flex-shrink-0">
+           <img src="https://img5.pic.in.th/file/secure-sv1/logo-MOPH270452adfe737af2.png" alt="MOPH Logo" class="h-9 w-9 object-contain">
         </div>
-        <div>
-          <h1 class="text-xl font-bold">Dashboard นักสังคมสงเคราะห์ทางการแพทย์</h1>
-          <p class="text-xs text-green-100">สำนักปลัดกระทรวงสาธารณสุข</p>
+        <div class="min-w-0">
+          <h1 class="text-sm sm:text-xl font-bold leading-tight">Dashboard นักสังคมสงเคราะห์ทางการแพทย์</h1>
+          <p class="text-xs text-green-100 hidden sm:block">สำนักปลัดกระทรวงสาธารณสุข</p>
         </div>
       </div>
-      <div class="flex items-center gap-3">
-         <div id="lastUpdatedBadge" class="hidden text-xs bg-white/10 px-3 py-1.5 rounded-lg">
+      <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+         <div id="lastUpdatedBadge" class="hidden sm:flex text-xs bg-white/10 px-3 py-1.5 rounded-lg items-center">
             <i class="fas fa-clock mr-1"></i> อัปเดตล่าสุด: <span id="lastUpdatedText">-</span>
          </div>
-         <a href="https://socialworkdn.github.io/MSWdatabase/" target="_top" class="bg-green-400 hover:bg-green-500 text-green-900 font-bold py-2 px-4 rounded shadow transition flex items-center">
-            <i class="fas fa-edit mr-2"></i> ไปหน้าบันทึกข้อมูล
+         <a href="https://socialworkdn.github.io/MSWdatabase/" target="_top" class="bg-green-400 hover:bg-green-500 text-green-900 font-bold py-2 px-3 sm:px-4 rounded shadow transition flex items-center text-xs sm:text-sm whitespace-nowrap">
+            <i class="fas fa-edit mr-1 sm:mr-2"></i> ไปหน้าบันทึกข้อมูล
          </a>
       </div>
     </div>
 
     <div class="bg-black/20 text-white border-t border-white/10">
       <div class="container mx-auto flex overflow-x-auto">
-        <button onclick="switchView('overview')" id="btn-overview" class="nav-link active px-6 py-3 whitespace-nowrap hover:bg-white/10"><i class="fas fa-chart-bar mr-2"></i>ภาพรวมสถิติ</button>
-        <button onclick="switchView('database')" id="btn-database" class="nav-link px-6 py-3 whitespace-nowrap hover:bg-white/10"><i class="fas fa-database mr-2"></i>ฐานข้อมูลรวม</button>
-        <button onclick="switchView('retiree')" id="btn-retiree" class="nav-link px-6 py-3 whitespace-nowrap hover:bg-white/10"><i class="fas fa-user-clock mr-2"></i>ผู้เกษียณอายุ</button>
+        <button onclick="switchView('overview')" id="btn-overview" class="nav-link active px-4 sm:px-6 py-3 whitespace-nowrap hover:bg-white/10 text-sm sm:text-base"><i class="fas fa-chart-bar mr-1 sm:mr-2"></i>ภาพรวมสถิติ</button>
+        <button onclick="switchView('database')" id="btn-database" class="nav-link px-4 sm:px-6 py-3 whitespace-nowrap hover:bg-white/10 text-sm sm:text-base"><i class="fas fa-database mr-1 sm:mr-2"></i>ฐานข้อมูลรวม</button>
+        <button onclick="switchView('retiree')" id="btn-retiree" class="nav-link px-4 sm:px-6 py-3 whitespace-nowrap hover:bg-white/10 text-sm sm:text-base"><i class="fas fa-user-clock mr-1 sm:mr-2"></i>ผู้เกษียณอายุ</button>
       </div>
     </div>
   </nav>
 
   <div id="filterBar" class="bg-white shadow-sm border-b">
-    <div class="container mx-auto px-4 py-4 flex items-center justify-end gap-3">
-       <button onclick="refreshData()" id="btnRefresh" class="bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 font-bold py-2 px-4 rounded shadow-sm transition flex items-center mr-auto md:mr-0">
-          <i class="fas fa-sync-alt mr-2 text-blue-600"></i> รีเฟรชข้อมูล
+    <div class="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+       <button onclick="refreshData()" id="btnRefresh" class="bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 font-bold py-2 px-3 sm:px-4 rounded shadow-sm transition flex items-center mr-auto text-sm sm:text-base">
+          <i class="fas fa-sync-alt mr-1.5 sm:mr-2 text-blue-600"></i> <span class="hidden sm:inline">รีเฟรชข้อมูล</span><span class="sm:hidden">รีเฟรช</span>
        </button>
        <div class="flex items-center gap-2">
            <span class="text-gray-600 font-bold hidden md:inline"><i class="fas fa-filter mr-1"></i> กรองข้อมูล:</span>
-           <select id="regionFilter" onchange="renderDashboard()" class="border-gray-300 border rounded-md p-2 shadow-sm focus:ring-blue-500">
+           <select id="regionFilter" onchange="renderDashboard()" class="border-gray-300 border rounded-md p-2 shadow-sm focus:ring-blue-500 text-sm sm:text-base max-w-[220px] sm:max-w-none">
               <option value="all">แสดงข้อมูลทั่วประเทศ</option>
               <script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">เขตสุขภาพที่ ${i}</option>`);</script>
            </select>
