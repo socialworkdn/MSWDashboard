@@ -6,7 +6,6 @@
   <title>Dashboard นักสังคมสงเคราะห์ทางการแพทย์</title>
   <link rel="icon" type="image/png" href="Seal.png">
 
-  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
@@ -18,219 +17,292 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap');
-    body { font-family: 'Sarabun', sans-serif; background-color: #f3f4f6; }
-    .bg-moph { background-color: #006a4e; }
-    .text-moph { color: #006a4e; }
-    .card-stat { transition: transform 0.2s; }
-    .card-stat:hover { transform: translateY(-5px); }
-    .nav-link.active { border-bottom: 3px solid white; font-weight: bold; background-color: rgba(255,255,255,0.1); }
+    /* ===== Design tokens (ชุดเดียวกับหน้าระบบบันทึกข้อมูล) ===== */
+    :root {
+      --moph: #006a4e;
+      --moph-600: #005a42;
+      --moph-50: #ecf7f2;
+      --moph-100: #d3ede1;
+      --ink: #1f2a24;
+      --ink-muted: #56645d;
+      --line: #d6ded9;
+      --ring: #0a8a63;
+      --bg: #f3f7f4;
+    }
+    body { font-family: 'Sarabun', Tahoma, sans-serif; background-color: var(--bg); color: var(--ink); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+
+    :focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; border-radius: 6px; }
+    .skip-link { position: absolute; left: -9999px; top: 8px; z-index: 100; background: #fff; color: var(--moph); padding: 8px 14px; border-radius: 8px; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+    .skip-link:focus { left: 8px; }
+
+    .bg-moph { background-color: var(--moph); }
+    .text-moph { color: var(--moph); }
+    .border-moph { border-color: var(--moph); }
+    button, a, [role="button"] { cursor: pointer; }
+
+    /* ===== ช่องกรอก (เหมือน .input-field ของหน้าบันทึกข้อมูล) ===== */
+    .input-field {
+      min-height: 44px; padding: .5rem .75rem; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink);
+      box-shadow: 0 1px 2px rgba(16,24,40,.04); transition: border-color .15s, box-shadow .15s;
+    }
+    .input-field:hover { border-color: #b5c3bb; }
+    .input-field:focus { outline: none; border-color: var(--ring); box-shadow: 0 0 0 3px rgba(10,138,99,.2); }
+
+    /* ===== แท็บเมนู ===== */
+    .nav-link { color: #e6f4ee; border-bottom: 3px solid transparent; font-weight: 500; }
+    .nav-link:hover { background-color: rgba(255,255,255,0.08); color: #fff; }
+    .nav-link.active { border-bottom-color: #fff; color: #fff; font-weight: 700; background-color: rgba(255,255,255,0.12); }
+
+    /* ===== หัวข้อแต่ละส่วน ===== */
+    .section-title { display: flex; align-items: center; gap: .6rem; font-size: 1.1rem; font-weight: 700; color: var(--ink); margin-bottom: 1rem; }
+    .section-icon { width: 32px; height: 32px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: .85rem; color: #fff; flex-shrink: 0; }
+
+    /* ===== การ์ด ===== */
+    .stat-card { background: #fff; border-radius: 14px; border: 1px solid #e3ebe6; box-shadow: 0 1px 3px rgba(16,24,40,.05); }
+    .card-stat { transition: transform .2s, box-shadow .2s; }
+    .card-stat:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(16,24,40,.08); }
     .chart-container { position: relative; height: 300px; width: 100%; }
     .fa-spin-fast { animation: fa-spin 0.5s infinite linear; }
+
+    /* ===== DataTables ให้เข้ากับธีม ===== */
+    .dataTables_wrapper { font-size: .95rem; }
+    .dataTables_wrapper .dataTables_filter input,
+    .dataTables_wrapper .dataTables_length select { border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; min-height: 40px; background: #fff; margin-left: .4rem; }
+    .dataTables_wrapper .dataTables_filter input:focus { outline: none; border-color: var(--ring); box-shadow: 0 0 0 3px rgba(10,138,99,.2); }
+    .dataTables_wrapper .dataTables_paginate .paginate_button { border-radius: 8px !important; min-width: 40px; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover { background: var(--moph) !important; color: #fff !important; border-color: var(--moph) !important; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button:not(.current):not(.disabled):hover { background: var(--moph-50) !important; color: var(--moph) !important; border-color: var(--moph-100) !important; }
+    table.dataTable thead th { background: var(--moph); color: #fff; font-weight: 600; border-bottom: none !important; }
+    table.dataTable thead th:first-child { border-top-left-radius: 10px; }
+    table.dataTable thead th:last-child { border-top-right-radius: 10px; }
+    table.dataTable.stripe tbody tr.odd { background-color: #f8fbf9; }
+    table.dataTable.hover tbody tr:hover { background-color: var(--moph-50); }
+    table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control:before { background-color: var(--moph); }
+
+    /* ===== SweetAlert2 ธีมเดียวกับหน้าบันทึกข้อมูล ===== */
+    .swal2-popup { font-family: 'Sarabun', Tahoma, sans-serif !important; border-radius: 16px !important; }
+    .swal2-styled.swal2-confirm { background-color: var(--moph); border-radius: 8px !important; min-height: 44px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+      .card-stat:hover { transform: none; }
+    }
   </style>
+  <!-- Tailwind CSS แบบ build ล่วงหน้า (แทน cdn.tailwindcss.com) — วางหลัง <style> เพื่อให้ utility class มีผลเหนือ class ด้านบน
+       หากแก้ไข class ใน index.html ให้ build ใหม่: npx tailwindcss@3 -c tailwind.config.js -i tailwind.src.css -o tailwind.css --minify -->
+  <link rel="stylesheet" href="tailwind.css">
 </head>
 <body>
+  <a href="#mainContent" class="skip-link">ข้ามไปยังเนื้อหาหลัก</a>
 
-  <nav id="navbar" class="bg-moph text-white shadow-lg sticky top-0 z-50">
+  <nav id="navbar" class="bg-moph text-white shadow-lg sticky top-0 z-50" style="background-image: linear-gradient(90deg,#00563f,#006a4e 60%,#0a7a58);" aria-label="แถบเมนูหลัก">
     <div class="container mx-auto px-3 sm:px-4 py-3 flex justify-between items-center flex-wrap gap-2">
       <div class="flex items-center space-x-3 min-w-0">
         <div class="bg-white p-1 rounded-full shadow-md flex-shrink-0">
-           <img src="Seal.png" alt="MOPH Logo" class="h-9 w-9 object-contain">
+           <img src="Seal.png" alt="ตรากระทรวงสาธารณสุข" class="h-9 w-9 object-contain">
         </div>
         <div class="min-w-0">
           <h1 class="text-sm sm:text-xl font-bold leading-tight">Dashboard นักสังคมสงเคราะห์ทางการแพทย์</h1>
-          <p class="text-xs text-green-100 hidden sm:block">สำนักปลัดกระทรวงสาธารณสุข</p>
+          <p class="text-xs text-green-100 hidden sm:block">สำนักงานปลัดกระทรวงสาธารณสุข</p>
         </div>
       </div>
       <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
          <div id="lastUpdatedBadge" class="hidden sm:flex text-xs bg-white/10 px-3 py-1.5 rounded-lg items-center">
-            <i class="fas fa-clock mr-1"></i> อัปเดตล่าสุด: <span id="lastUpdatedText">-</span>
+            <i class="fas fa-clock mr-1" aria-hidden="true"></i> อัปเดตล่าสุด: <span id="lastUpdatedText" class="ml-1">-</span>
          </div>
-         <a href="https://socialworkdn.github.io/MSWdatabase/" target="_top" class="bg-green-400 hover:bg-green-500 text-green-900 font-bold py-2 px-3 sm:px-4 rounded shadow transition flex items-center text-xs sm:text-sm whitespace-nowrap">
-            <i class="fas fa-edit mr-1 sm:mr-2"></i> ไปหน้าบันทึกข้อมูล
+         <a href="https://socialworkdn.github.io/MSWdatabase/" target="_top" class="bg-yellow-400 hover:bg-yellow-300 text-yellow-900 font-bold py-2 px-3 sm:px-4 rounded-lg shadow transition flex items-center text-xs sm:text-sm whitespace-nowrap min-h-[40px]">
+            <i class="fas fa-edit mr-1 sm:mr-2" aria-hidden="true"></i> ไปหน้าบันทึกข้อมูล
          </a>
       </div>
     </div>
 
-    <div class="bg-black/20 text-white border-t border-white/10">
-      <div class="container mx-auto flex overflow-x-auto">
-        <button onclick="switchView('overview')" id="btn-overview" class="nav-link active px-4 sm:px-6 py-3 whitespace-nowrap hover:bg-white/10 text-sm sm:text-base"><i class="fas fa-chart-bar mr-1 sm:mr-2"></i>ภาพรวมสถิติ</button>
-        <button onclick="switchView('database')" id="btn-database" class="nav-link px-4 sm:px-6 py-3 whitespace-nowrap hover:bg-white/10 text-sm sm:text-base"><i class="fas fa-database mr-1 sm:mr-2"></i>ฐานข้อมูลรวม</button>
-        <button onclick="switchView('retiree')" id="btn-retiree" class="nav-link px-4 sm:px-6 py-3 whitespace-nowrap hover:bg-white/10 text-sm sm:text-base"><i class="fas fa-user-clock mr-1 sm:mr-2"></i>ผู้เกษียณอายุ</button>
+    <div class="bg-black/15 text-white border-t border-white/10">
+      <div class="container mx-auto flex overflow-x-auto" role="tablist" aria-label="มุมมองข้อมูล">
+        <button onclick="switchView('overview')" id="btn-overview" role="tab" aria-selected="true" aria-controls="view-overview" class="nav-link active px-4 sm:px-6 py-3 whitespace-nowrap text-sm sm:text-base transition"><i class="fas fa-chart-bar mr-1 sm:mr-2" aria-hidden="true"></i>ภาพรวมสถิติ</button>
+        <button onclick="switchView('database')" id="btn-database" role="tab" aria-selected="false" aria-controls="view-database" class="nav-link px-4 sm:px-6 py-3 whitespace-nowrap text-sm sm:text-base transition"><i class="fas fa-database mr-1 sm:mr-2" aria-hidden="true"></i>ฐานข้อมูลรวม</button>
+        <button onclick="switchView('retiree')" id="btn-retiree" role="tab" aria-selected="false" aria-controls="view-retiree" class="nav-link px-4 sm:px-6 py-3 whitespace-nowrap text-sm sm:text-base transition"><i class="fas fa-user-clock mr-1 sm:mr-2" aria-hidden="true"></i>ผู้เกษียณอายุ</button>
       </div>
     </div>
   </nav>
 
   <div id="filterBar" class="bg-white shadow-sm border-b">
-    <div class="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex flex-wrap items-center justify-end gap-2 sm:gap-3">
-       <button onclick="refreshData()" id="btnRefresh" class="bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 font-bold py-2 px-3 sm:px-4 rounded shadow-sm transition flex items-center mr-auto text-sm sm:text-base">
-          <i class="fas fa-sync-alt mr-1.5 sm:mr-2 text-blue-600"></i> <span class="hidden sm:inline">รีเฟรชข้อมูล</span><span class="sm:hidden">รีเฟรช</span>
+    <div class="container mx-auto px-3 sm:px-4 py-3 flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+       <button onclick="refreshData()" id="btnRefresh" class="bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 font-semibold px-3 sm:px-4 rounded-lg shadow-sm transition flex items-center mr-auto text-sm sm:text-base min-h-[44px]" aria-label="รีเฟรชข้อมูล">
+          <i class="fas fa-sync-alt mr-1.5 sm:mr-2 text-moph" aria-hidden="true"></i> <span class="hidden sm:inline">รีเฟรชข้อมูล</span><span class="sm:hidden">รีเฟรช</span>
        </button>
        <div class="flex items-center gap-2">
-           <span class="text-gray-600 font-bold hidden md:inline"><i class="fas fa-filter mr-1"></i> กรองข้อมูล:</span>
-           <select id="regionFilter" onchange="renderDashboard()" class="border-gray-300 border rounded-md p-2 shadow-sm focus:ring-blue-500 text-sm sm:text-base max-w-[220px] sm:max-w-none">
+           <label for="regionFilter" class="text-gray-600 font-semibold hidden md:inline"><i class="fas fa-filter mr-1" aria-hidden="true"></i> กรองข้อมูล:</label>
+           <select id="regionFilter" onchange="renderDashboard()" class="input-field text-sm sm:text-base max-w-[220px] sm:max-w-none" aria-label="กรองข้อมูลตามเขตสุขภาพ">
               <option value="all">แสดงข้อมูลทั่วประเทศ</option>
-              <script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">เขตสุขภาพที่ ${i}</option>`);</script>
            </select>
        </div>
     </div>
   </div>
 
-  <div id="loading" class="text-center py-20">
-      <i class="fas fa-spinner fa-spin text-5xl text-moph"></i>
+  <div id="loading" class="text-center py-20" role="status" aria-live="polite">
+      <i class="fas fa-spinner fa-spin text-5xl text-moph" aria-hidden="true"></i>
       <p class="mt-4 text-gray-500">กำลังประมวลผลข้อมูล...</p>
   </div>
 
-  <div id="mainContent" class="hidden container mx-auto px-4 py-8 pb-20">
+  <main id="mainContent" tabindex="-1" class="hidden container mx-auto px-3 sm:px-4 py-6 sm:py-8 pb-12">
 
-    <div id="view-overview" class="view-section">
+    <div id="view-overview" class="view-section" role="tabpanel" aria-labelledby="btn-overview">
 
-       <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-teal-500 pl-3">ข้อมูลโรงพยาบาล</h3>
-       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-           <div class="bg-white p-6 rounded-xl shadow border-t-4 border-teal-600 flex flex-col justify-center items-center">
-               <div class="text-gray-500 text-lg">จำนวนโรงพยาบาลทั้งหมด</div>
+       <h2 class="section-title"><span class="section-icon bg-teal-600" aria-hidden="true"><i class="fas fa-hospital"></i></span>ข้อมูลโรงพยาบาล</h2>
+       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+           <div class="stat-card p-6 border-t-4 border-t-teal-600 flex flex-col justify-center items-center">
+               <div class="w-12 h-12 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center mb-2"><i class="fas fa-hospital text-xl" aria-hidden="true"></i></div>
+               <div class="text-gray-600 text-lg">จำนวนโรงพยาบาลทั้งหมด</div>
                <div class="text-5xl font-bold text-teal-700 mt-2" id="statHospTotal">0</div>
-               <div class="text-sm text-gray-400 mt-1">แห่ง</div>
+               <div class="text-sm text-gray-500 mt-1">แห่ง</div>
            </div>
-           <div class="md:col-span-2 bg-white p-4 rounded-xl shadow border border-gray-100">
-               <div class="font-bold text-gray-600 mb-2 text-center">สัดส่วนแยกตามระดับโรงพยาบาล</div>
+           <div class="md:col-span-2 stat-card p-4">
+               <div class="font-bold text-gray-700 mb-2 text-center">สัดส่วนแยกตามระดับโรงพยาบาล</div>
                <div class="chart-container" style="height: 250px;">
-                   <canvas id="chartHospitals"></canvas>
+                   <canvas id="chartHospitals" role="img" aria-label="กราฟโดนัทสัดส่วนโรงพยาบาลแยกตามระดับ"></canvas>
                </div>
            </div>
        </div>
 
-       <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-moph pl-3">ข้อมูลอัตรากำลังบุคลากร</h3>
-       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+       <h2 class="section-title"><span class="section-icon bg-moph" aria-hidden="true"><i class="fas fa-users"></i></span>ข้อมูลอัตรากำลังบุคลากร</h2>
+       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <div class="grid grid-cols-2 gap-4 md:col-span-2">
-              <div class="card-stat bg-white p-4 rounded-xl shadow border-l-4 border-blue-500">
-                 <div class="text-gray-500 text-xs">ผู้ปฏิบัติงานทั้งหมด</div>
+              <div class="card-stat stat-card p-4 border-l-4 border-l-blue-500">
+                 <div class="text-gray-600 text-xs">ผู้ปฏิบัติงานทั้งหมด</div>
                  <div class="text-2xl font-bold text-blue-700" id="statTotal">0</div>
-                 <div class="text-xs text-gray-400 mt-1">คน</div>
+                 <div class="text-xs text-gray-500 mt-1">คน</div>
               </div>
-              <div class="card-stat bg-white p-4 rounded-xl shadow border-l-4 border-green-500">
-                 <div class="text-gray-500 text-xs">ข้าราชการ</div>
+              <div class="card-stat stat-card p-4 border-l-4 border-l-green-500">
+                 <div class="text-gray-600 text-xs">ข้าราชการ</div>
                  <div id="statCivil" class="text-2xl font-bold text-green-700">0</div>
-                 </div>
-              <div class="card-stat bg-white p-4 rounded-xl shadow border-l-4 border-purple-500">
-                 <div class="text-gray-500 text-xs">พนักงาน/ลูกจ้าง</div>
+              </div>
+              <div class="card-stat stat-card p-4 border-l-4 border-l-purple-500">
+                 <div class="text-gray-600 text-xs">พนักงาน/ลูกจ้าง</div>
                  <div id="statOtherEmp" class="text-2xl font-bold text-purple-700">0</div>
-                 </div>
-              <div class="card-stat bg-white p-4 rounded-xl shadow border-l-4 border-red-500">
-                 <div class="text-gray-500 text-xs">ตำแหน่งว่าง</div>
+              </div>
+              <div class="card-stat stat-card p-4 border-l-4 border-l-red-500">
+                 <div class="text-gray-600 text-xs">ตำแหน่งว่าง</div>
                  <div id="statVacancy" class="text-2xl font-bold text-red-700">0</div>
-                 </div>
+              </div>
           </div>
-          <div class="bg-white p-4 rounded-xl shadow border border-gray-100">
-              <div class="font-bold text-gray-600 mb-2 text-center">ภาพรวมสถานะอัตรากำลัง</div>
+          <div class="stat-card p-4">
+              <div class="font-bold text-gray-700 mb-2 text-center">ภาพรวมสถานะอัตรากำลัง</div>
               <div class="chart-container" style="height: 200px;">
-                  <canvas id="chartWorkforce"></canvas>
+                  <canvas id="chartWorkforce" role="img" aria-label="กราฟแท่งเปรียบเทียบข้าราชการ พนักงาน/ลูกจ้าง และตำแหน่งว่าง"></canvas>
               </div>
           </div>
        </div>
 
-       <div class="bg-white rounded-xl shadow p-6 border border-red-100 mb-8">
-           <div class="text-gray-700 font-bold mb-4"><i class="fas fa-exclamation-circle text-red-500"></i> รายละเอียดตำแหน่งว่างแยกตามประเภท</div>
-           <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
+       <div class="stat-card p-6 border-red-100 mb-10">
+           <div class="text-gray-800 font-bold mb-4"><i class="fas fa-exclamation-circle text-red-500 mr-1" aria-hidden="true"></i> รายละเอียดตำแหน่งว่างแยกตามประเภท</div>
+           <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
                <div class="p-2">
-                   <div class="text-xs text-gray-500">ข้าราชการ</div>
+                   <div class="text-xs text-gray-600">ข้าราชการ</div>
                    <div class="text-xl font-bold text-gray-800" id="vacCivil">0</div>
-                   <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2"><div class="bg-red-500 h-1.5 rounded-full" id="barVacCivil" style="width: 0%"></div></div>
+                   <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2"><div class="bg-red-500 h-1.5 rounded-full transition-all" id="barVacCivil" style="width: 0%"></div></div>
                </div>
                <div class="p-2">
-                   <div class="text-xs text-gray-500">พนักงานราชการ</div>
+                   <div class="text-xs text-gray-600">พนักงานราชการ</div>
                    <div class="text-xl font-bold text-gray-800" id="vacGov">0</div>
-                   <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2"><div class="bg-orange-500 h-1.5 rounded-full" id="barVacGov" style="width: 0%"></div></div>
+                   <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2"><div class="bg-orange-500 h-1.5 rounded-full transition-all" id="barVacGov" style="width: 0%"></div></div>
                </div>
                <div class="p-2">
-                   <div class="text-xs text-gray-500">พนักงานกระทรวงสาธารณสุข</div>
+                   <div class="text-xs text-gray-600">พนักงานกระทรวงสาธารณสุข</div>
                    <div class="text-xl font-bold text-gray-800" id="vacMoph">0</div>
-                   <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2"><div class="bg-yellow-500 h-1.5 rounded-full" id="barVacMoph" style="width: 0%"></div></div>
+                   <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2"><div class="bg-yellow-500 h-1.5 rounded-full transition-all" id="barVacMoph" style="width: 0%"></div></div>
                </div>
                <div class="p-2">
-                   <div class="text-xs text-gray-500">ลูกจ้างชั่วคราว</div>
+                   <div class="text-xs text-gray-600">ลูกจ้างชั่วคราว</div>
                    <div class="text-xl font-bold text-gray-800" id="vacTemp">0</div>
-                   <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2"><div class="bg-blue-400 h-1.5 rounded-full" id="barVacTemp" style="width: 0%"></div></div>
+                   <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2"><div class="bg-blue-400 h-1.5 rounded-full transition-all" id="barVacTemp" style="width: 0%"></div></div>
                </div>
            </div>
        </div>
 
-       <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-indigo-500 pl-3">ข้อมูลระดับตำแหน่ง (Positions)</h3>
-       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          <div class="bg-white rounded-lg shadow p-4">
-             <div class="font-bold text-gray-600 mb-2 text-center">กราฟแสดงจำนวนแยกตามระดับ (%)</div>
+       <h2 class="section-title"><span class="section-icon bg-indigo-500" aria-hidden="true"><i class="fas fa-layer-group"></i></span>ข้อมูลระดับตำแหน่ง</h2>
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+          <div class="stat-card p-4">
+             <div class="font-bold text-gray-700 mb-2 text-center">กราฟแสดงจำนวนแยกตามระดับ (%)</div>
              <div class="chart-container" style="height: 300px;">
-                 <canvas id="chartPositions"></canvas>
+                 <canvas id="chartPositions" role="img" aria-label="กราฟแท่งแนวนอนจำนวนบุคลากรแยกตามระดับตำแหน่ง"></canvas>
              </div>
           </div>
-          <div class="bg-white rounded-lg shadow overflow-hidden h-full">
+          <div class="stat-card overflow-hidden h-full">
              <div class="bg-gray-50 px-4 py-3 border-b font-bold text-gray-700 text-sm">ตารางสรุปจำนวนและร้อยละ</div>
              <table class="min-w-full divide-y divide-gray-200">
-                <tbody class="divide-y divide-gray-200" id="tablePositions"></tbody>
+                <caption class="sr-only">จำนวนและร้อยละของบุคลากรแยกตามระดับตำแหน่ง</caption>
+                <tbody class="divide-y divide-gray-100" id="tablePositions"></tbody>
              </table>
           </div>
        </div>
 
-       <h3 class="text-lg font-bold text-gray-700 mb-4 border-l-4 border-orange-500 pl-3">สถิติระยะเวลาและประสบการณ์</h3>
-       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+       <h2 class="section-title"><span class="section-icon bg-orange-500" aria-hidden="true"><i class="fas fa-hourglass-half"></i></span>สถิติระยะเวลาและประสบการณ์</h2>
+       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
 
-          <div class="bg-white rounded-xl shadow p-5 border border-gray-100">
-             <div class="text-orange-600 font-bold mb-3 text-sm"><i class="fas fa-hourglass-half mr-2"></i>อายุงาน</div>
+          <div class="stat-card p-5">
+             <div class="text-orange-700 font-bold mb-3 text-sm"><i class="fas fa-hourglass-half mr-2" aria-hidden="true"></i>อายุงาน</div>
              <div class="grid grid-cols-3 gap-2 text-center divide-x">
-                <div><div class="text-xs text-gray-400">ต่ำสุด</div><div id="tenureMin" class="font-bold text-lg">0</div><span class="text-xs">ปี</span></div>
-                <div><div class="text-xs text-gray-400">สูงสุด</div><div id="tenureMax" class="font-bold text-lg">0</div><span class="text-xs">ปี</span></div>
-                <div><div class="text-xs text-gray-400">เฉลี่ย</div><div id="tenureAvg" class="font-bold text-lg text-orange-600">0</div><span class="text-xs">ปี</span></div>
+                <div><div class="text-xs text-gray-500">ต่ำสุด</div><div id="tenureMin" class="font-bold text-lg">0</div><span class="text-xs text-gray-500">ปี</span></div>
+                <div><div class="text-xs text-gray-500">สูงสุด</div><div id="tenureMax" class="font-bold text-lg">0</div><span class="text-xs text-gray-500">ปี</span></div>
+                <div><div class="text-xs text-gray-500">เฉลี่ย</div><div id="tenureAvg" class="font-bold text-lg text-orange-600">0</div><span class="text-xs text-gray-500">ปี</span></div>
              </div>
           </div>
 
-          <div class="bg-white rounded-xl shadow p-5 border-t-4 border-blue-500 relative overflow-hidden">
-             <div class="text-blue-800 font-bold mb-3 text-sm"><i class="fas fa-briefcase-medical mr-2"></i>ประสบการณ์การแพทย์ (ทั้งหมด)</div>
+          <div class="stat-card p-5 border-t-4 border-t-blue-500">
+             <div class="text-blue-800 font-bold mb-3 text-sm"><i class="fas fa-briefcase-medical mr-2" aria-hidden="true"></i>ประสบการณ์การแพทย์ (ทั้งหมด)</div>
              <div class="grid grid-cols-3 gap-2 text-center divide-x">
-                <div><div class="text-xs text-gray-400">ต่ำสุด</div><div id="expMin" class="font-bold text-lg">0</div><span class="text-xs">ปี</span></div>
-                <div><div class="text-xs text-gray-400">สูงสุด</div><div id="expMax" class="font-bold text-lg">0</div><span class="text-xs">ปี</span></div>
-                <div><div class="text-xs text-gray-400">เฉลี่ย</div><div id="expAvg" class="font-bold text-lg text-blue-600">0</div><span class="text-xs">ปี</span></div>
+                <div><div class="text-xs text-gray-500">ต่ำสุด</div><div id="expMin" class="font-bold text-lg">0</div><span class="text-xs text-gray-500">ปี</span></div>
+                <div><div class="text-xs text-gray-500">สูงสุด</div><div id="expMax" class="font-bold text-lg">0</div><span class="text-xs text-gray-500">ปี</span></div>
+                <div><div class="text-xs text-gray-500">เฉลี่ย</div><div id="expAvg" class="font-bold text-lg text-blue-600">0</div><span class="text-xs text-gray-500">ปี</span></div>
              </div>
           </div>
 
-          <div class="bg-white rounded-xl shadow p-5 border border-gray-100">
-             <div class="text-indigo-600 font-bold mb-3 text-sm"><i class="fas fa-layer-group mr-2"></i>ระยะเวลาที่อยู่ในระดับปัจจุบัน</div>
+          <div class="stat-card p-5">
+             <div class="text-indigo-700 font-bold mb-3 text-sm"><i class="fas fa-layer-group mr-2" aria-hidden="true"></i>ระยะเวลาที่อยู่ในระดับปัจจุบัน</div>
              <div class="grid grid-cols-3 gap-2 text-center divide-x">
-                <div><div class="text-xs text-gray-400">ต่ำสุด</div><div id="levelMin" class="font-bold text-lg">0</div><span class="text-xs">ปี</span></div>
-                <div><div class="text-xs text-gray-400">สูงสุด</div><div id="levelMax" class="font-bold text-lg">0</div><span class="text-xs">ปี</span></div>
-                <div><div class="text-xs text-gray-400">เฉลี่ย</div><div id="levelAvg" class="font-bold text-lg text-indigo-600">0</div><span class="text-xs">ปี</span></div>
+                <div><div class="text-xs text-gray-500">ต่ำสุด</div><div id="levelMin" class="font-bold text-lg">0</div><span class="text-xs text-gray-500">ปี</span></div>
+                <div><div class="text-xs text-gray-500">สูงสุด</div><div id="levelMax" class="font-bold text-lg">0</div><span class="text-xs text-gray-500">ปี</span></div>
+                <div><div class="text-xs text-gray-500">เฉลี่ย</div><div id="levelAvg" class="font-bold text-lg text-indigo-600">0</div><span class="text-xs text-gray-500">ปี</span></div>
              </div>
           </div>
        </div>
 
        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div class="bg-white rounded-xl shadow p-4 border-l-4 border-green-500">
-             <div class="font-bold text-green-800 text-sm mb-2"><i class="fas fa-graduation-cap"></i> วุฒิการศึกษา (สังคมสงเคราะห์)</div>
+          <div class="stat-card p-4 border-l-4 border-l-green-500">
+             <div class="font-bold text-green-800 text-sm mb-2"><i class="fas fa-graduation-cap mr-1" aria-hidden="true"></i> วุฒิการศึกษา (สังคมสงเคราะห์)</div>
              <div class="flex justify-between items-center text-sm px-4">
                  <div>มีวุฒิ: <span class="font-bold text-lg text-green-700 ml-2" id="statHasDegree">0</span></div>
                  <div>ไม่มี: <span class="font-bold text-lg text-red-600 ml-2" id="statNoDegree">0</span></div>
              </div>
           </div>
 
-          <div class="bg-white rounded-xl shadow overflow-hidden">
+          <div class="stat-card overflow-hidden">
              <div class="grid grid-cols-2 h-full">
                  <div class="border-r p-4">
-                     <div class="font-bold text-yellow-800 text-sm mb-2"><i class="fas fa-certificate"></i> ใบประกอบวิชาชีพฯ</div>
+                     <div class="font-bold text-yellow-800 text-sm mb-2"><i class="fas fa-certificate mr-1" aria-hidden="true"></i> ใบประกอบวิชาชีพฯ</div>
                      <div id="miniTableLicense" class="text-sm space-y-2"></div>
                  </div>
                  <div class="p-4">
-                     <div class="font-bold text-blue-800 text-sm mb-2"><i class="fas fa-users"></i> สมาชิกสภาวิชาชีพฯ</div>
+                     <div class="font-bold text-blue-800 text-sm mb-2"><i class="fas fa-users mr-1" aria-hidden="true"></i> สมาชิกสภาวิชาชีพฯ</div>
                      <div id="miniTableCouncil" class="text-sm space-y-2"></div>
                  </div>
              </div>
           </div>
        </div>
 
-    </div> <div id="view-database" class="view-section hidden">
-       <div class="bg-white p-6 rounded-xl shadow border border-blue-100">
-          <div class="flex justify-between items-center mb-4">
-             <h2 class="text-xl font-bold text-moph"><i class="fas fa-database mr-2"></i> ฐานข้อมูลนักสังคมสงเคราะห์ทั้งหมด</h2>
-             <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">Update Real-time</span>
+    </div>
+
+    <div id="view-database" class="view-section hidden" role="tabpanel" aria-labelledby="btn-database">
+       <div class="stat-card p-4 sm:p-6">
+          <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
+             <h2 class="section-title !mb-0"><span class="section-icon bg-moph" aria-hidden="true"><i class="fas fa-database"></i></span>ฐานข้อมูลนักสังคมสงเคราะห์ทั้งหมด</h2>
+             <span class="text-xs text-gray-600 bg-gray-100 px-2.5 py-1 rounded-full"><i class="fas fa-circle text-[6px] text-green-500 mr-1 align-middle" aria-hidden="true"></i>ข้อมูลจากระบบบันทึก (แคช 5 นาที)</span>
           </div>
           <table id="fullTable" class="stripe hover row-border" style="width:100%">
              <thead>
@@ -243,38 +315,41 @@
        </div>
     </div>
 
-    <div id="view-retiree" class="view-section hidden">
-       <div class="bg-white p-8 rounded-xl shadow max-w-5xl mx-auto">
-          <h2 class="text-2xl font-bold text-red-700 mb-6 text-center"><i class="fas fa-user-clock mr-2"></i> ตรวจสอบผู้เกษียณอายุราชการ</h2>
-          <div class="flex flex-wrap gap-4 mb-6 bg-red-50 p-6 rounded-lg justify-center items-end border border-red-100">
+    <div id="view-retiree" class="view-section hidden" role="tabpanel" aria-labelledby="btn-retiree">
+       <div class="stat-card p-5 sm:p-8 max-w-5xl mx-auto">
+          <h2 class="text-2xl font-bold text-red-700 mb-6 text-center"><i class="fas fa-user-clock mr-2" aria-hidden="true"></i> ตรวจสอบผู้เกษียณอายุราชการ</h2>
+          <form onsubmit="event.preventDefault(); calcRetirees();" class="flex flex-wrap gap-3 mb-6 bg-red-50 p-5 sm:p-6 rounded-xl justify-center items-end border border-red-100">
              <div>
-                <label class="block text-sm font-bold text-red-800 mb-1">เลือกปีงบประมาณ (พ.ศ.)</label>
-                <input type="number" id="fiscalYear" value="2569" class="border p-2 rounded w-32 text-center text-lg font-bold text-red-600">
+                <label for="fiscalYear" class="block text-sm font-bold text-red-800 mb-1">เลือกปีงบประมาณ (พ.ศ.)</label>
+                <input type="number" id="fiscalYear" value="2569" min="2500" max="2700" inputmode="numeric" class="input-field w-32 text-center text-lg font-bold text-red-700">
              </div>
-             <button onclick="calcRetirees()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg shadow font-bold h-full">ค้นหา</button>
-             <button id="btnExportRetirees" onclick="exportRetireesToExcel()" class="hidden bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow font-bold h-full">
-                <i class="fas fa-file-excel mr-2"></i> Export Excel
+             <button type="submit" id="btnSearchRetirees" class="bg-red-600 hover:bg-red-700 text-white px-6 rounded-lg shadow font-bold min-h-[44px] transition"><i class="fas fa-magnifying-glass mr-2" aria-hidden="true"></i>ค้นหา</button>
+             <button type="button" id="btnExportRetirees" onclick="exportRetireesToExcel()" class="hidden bg-green-700 hover:bg-green-800 text-white px-6 rounded-lg shadow font-bold min-h-[44px] transition">
+                <i class="fas fa-file-excel mr-2" aria-hidden="true"></i> Export Excel
              </button>
-          </div>
-          <div id="retireeCount" class="text-sm text-gray-500 mb-2"></div>
-          <div class="overflow-x-auto">
+          </form>
+          <div id="retireeCount" class="text-sm text-gray-600 mb-2" aria-live="polite"></div>
+          <div class="overflow-x-auto rounded-xl border border-gray-200">
              <table class="min-w-full divide-y divide-gray-200">
                 <thead>
                    <tr class="bg-red-600 text-white text-left text-sm">
-                      <th class="px-6 py-3">ชื่อ-สกุล</th>
-                      <th class="px-6 py-3">ตำแหน่ง</th>
-                      <th class="px-6 py-3">เขตสุขภาพ</th>
-                      <th class="px-6 py-3">โรงพยาบาล</th>
-                      <th class="px-6 py-3">ประเภทบุคลากร</th>
+                      <th scope="col" class="px-6 py-3">ชื่อ-สกุล</th>
+                      <th scope="col" class="px-6 py-3">ตำแหน่ง</th>
+                      <th scope="col" class="px-6 py-3">เขตสุขภาพ</th>
+                      <th scope="col" class="px-6 py-3">โรงพยาบาล</th>
+                      <th scope="col" class="px-6 py-3">ประเภทบุคลากร</th>
                    </tr>
                 </thead>
-                <tbody id="retireTableBody" class="bg-white divide-y divide-gray-200"></tbody>
+                <tbody id="retireTableBody" class="bg-white divide-y divide-gray-100">
+                   <tr><td colspan="5" class="p-8 text-center text-gray-500"><i class="fas fa-calendar-days text-2xl text-gray-300 block mb-2" aria-hidden="true"></i>เลือกปีงบประมาณแล้วกด "ค้นหา"</td></tr>
+                </tbody>
              </table>
           </div>
        </div>
     </div>
 
-  </div>
+  </main>
+  <footer class="text-center text-xs text-gray-500 pb-8 px-4">© กรรมการพัฒนางานสังคมสงเคราะห์ในโรงพยาบาล สำนักงานปลัดกระทรวงสาธารณสุข</footer>
 
   <script>
     // ==========================================================
@@ -331,8 +406,15 @@
     // ==========================================================
 
     Chart.register(ChartDataLabels);
+    Chart.defaults.font.family = "'Sarabun', Tahoma, sans-serif";
     let rawData = { personnel: [], hospitals: [] };
     let charts = { hosp: null, work: null, pos: null };
+
+    // เติมตัวเลือกเขตสุขภาพ 1-12 (แทน document.write เดิม)
+    (function populateRegionOptions() {
+       const sel = document.getElementById('regionFilter');
+       for (let i = 1; i <= 12; i++) sel.add(new Option(`เขตสุขภาพที่ ${i}`, String(i)));
+    })();
 
     // --- ป้องกัน XSS: escape ข้อมูลก่อนแสดงผลใน innerHTML ---
     function escapeHtml(str) {
@@ -367,6 +449,7 @@
              document.getElementById('loading').classList.add('hidden');
              const refreshIcon = document.querySelector('#btnRefresh i');
              if(refreshIcon) refreshIcon.classList.remove('fa-spin-fast');
+             document.getElementById('btnRefresh').disabled = false;
 
              if(res.error) { Swal.fire('ข้อผิดพลาด', res.message, 'error'); }
              else {
@@ -383,6 +466,9 @@
           })
           .withFailureHandler(err => {
              document.getElementById('loading').classList.add('hidden');
+             const refreshIcon = document.querySelector('#btnRefresh i');
+             if(refreshIcon) refreshIcon.classList.remove('fa-spin-fast');
+             document.getElementById('btnRefresh').disabled = false;
              Swal.fire('เกิดข้อผิดพลาดในการเชื่อมต่อ', (err && err.message) ? err.message : 'กรุณาลองใหม่อีกครั้ง', 'error');
           })
           .getDashboardDataPackage(!!forceRefresh);
@@ -392,14 +478,23 @@
         document.getElementById('loading').classList.remove('hidden');
         document.getElementById('mainContent').classList.add('hidden');
         document.querySelector('#btnRefresh i').classList.add('fa-spin-fast');
+        document.getElementById('btnRefresh').disabled = true; // กันกดซ้ำระหว่างโหลด
         loadData(true); // บังคับข้าม cache เพื่อดึงข้อมูลล่าสุดจริง ๆ
     }
 
     function switchView(viewName) {
        document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
        document.getElementById('view-'+viewName).classList.remove('hidden');
-       document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+       document.querySelectorAll('.nav-link').forEach(el => { el.classList.remove('active'); el.setAttribute('aria-selected', 'false'); });
        document.getElementById('btn-'+viewName).classList.add('active');
+       document.getElementById('btn-'+viewName).setAttribute('aria-selected', 'true');
+
+       // [แก้ไข] DataTable ถูกสร้างตอนแท็บยังซ่อนอยู่ ทำให้ความกว้างคอลัมน์เพี้ยน — คำนวณใหม่เมื่อเปิดแท็บ
+       if (viewName === 'database' && $.fn.DataTable.isDataTable('#fullTable')) {
+          const dt = $('#fullTable').DataTable();
+          dt.columns.adjust();
+          if (dt.responsive) dt.responsive.recalc();
+       }
     }
 
     // Helper: Calculate Percentage String
@@ -437,7 +532,7 @@
        document.getElementById('statOtherEmp').innerHTML = `${fmtNum(govEmp)} <span class="text-sm font-normal text-gray-500">(${calcPct(govEmp, total)})</span>`;
 
        // 2. ตำแหน่งว่าง: เทียบกับ "กรอบอัตรากำลังรวม" (Total Frame)
-       document.getElementById('statVacancy').innerHTML = `${fmtNum(totalVac)} <span class="text-sm font-normal text-red-400">(${calcPct(totalVac, totalFrame)})</span>`;
+       document.getElementById('statVacancy').innerHTML = `${fmtNum(totalVac)} <span class="text-sm font-normal text-red-500">(${calcPct(totalVac, totalFrame)})</span>`;
 
        document.getElementById('vacCivil').innerText = fmtNum(vacCivil); document.getElementById('barVacCivil').style.width = (totalVac?vacCivil/totalVac*100:0) + "%";
        document.getElementById('vacGov').innerText = fmtNum(vacGov); document.getElementById('barVacGov').style.width = (totalVac?vacGov/totalVac*100:0) + "%";
@@ -469,9 +564,9 @@
 
        let posHtml = '';
        for(let [k,v] of Object.entries(posCounts)) {
-           let displayVal = v > 0 ? `<span class="text-indigo-700 font-bold">${fmtNum(v)}</span>` : `<span class="text-gray-300">0</span>`;
+           let displayVal = v > 0 ? `<span class="text-indigo-700 font-bold">${fmtNum(v)}</span>` : `<span class="text-gray-400">0</span>`;
            let pct = v > 0 ? `<span class="text-xs text-gray-500 ml-1">(${calcPct(v, total)})</span>` : '';
-           posHtml += `<tr><td class="px-4 py-2 text-sm text-gray-700">${escapeHtml(k)}</td><td class="px-4 py-2 text-right font-bold">${displayVal} ${pct}</td></tr>`;
+           posHtml += `<tr><td class="px-4 py-2.5 text-sm text-gray-700">${escapeHtml(k)}</td><td class="px-4 py-2.5 text-right font-bold">${displayVal} ${pct}</td></tr>`;
        }
        document.getElementById('tablePositions').innerHTML = posHtml;
 
@@ -495,11 +590,11 @@
        // Education % (เทียบกับคนที่มีอยู่จริง)
        const hasDeg = pData.filter(r => r[24] == 'มี').length;
        const noDeg = pData.filter(r => r[24] == 'ไม่มี').length;
-       document.getElementById('statHasDegree').innerHTML = `${fmtNum(hasDeg)} <span class="text-xs text-green-500 font-normal">(${calcPct(hasDeg, total)})</span>`;
-       document.getElementById('statNoDegree').innerHTML = `${fmtNum(noDeg)} <span class="text-xs text-red-400 font-normal">(${calcPct(noDeg, total)})</span>`;
+       document.getElementById('statHasDegree').innerHTML = `${fmtNum(hasDeg)} <span class="text-xs text-green-600 font-normal">(${calcPct(hasDeg, total)})</span>`;
+       document.getElementById('statNoDegree').innerHTML = `${fmtNum(noDeg)} <span class="text-xs text-red-500 font-normal">(${calcPct(noDeg, total)})</span>`;
 
-       renderMiniTable('miniTableLicense', 28, {'มี': 'text-green-600', 'ไม่มี': 'text-red-600', 'หมดอายุ': 'text-orange-500', 'กำลังต่ออายุ': 'text-blue-500'}, pData);
-       renderMiniTable('miniTableCouncil', 25, {'เป็น': 'text-blue-600', 'ไม่เป็น': 'text-gray-500', 'หมดอายุ': 'text-orange-500'}, pData);
+       renderMiniTable('miniTableLicense', 28, {'มี': 'text-green-700', 'ไม่มี': 'text-red-600', 'หมดอายุ': 'text-orange-600', 'กำลังต่ออายุ': 'text-blue-600'}, pData);
+       renderMiniTable('miniTableCouncil', 25, {'เป็น': 'text-blue-700', 'ไม่เป็น': 'text-gray-600', 'หมดอายุ': 'text-orange-600'}, pData);
 
        if($.fn.DataTable.isDataTable('#fullTable')) {
           const table = $('#fullTable').DataTable();
@@ -615,7 +710,7 @@
         let total = data.length;
         for(let [k, css] of Object.entries(colorMap)) {
             let pct = total > 0 ? ((counts[k]/total)*100).toFixed(1) + '%' : '0%';
-            html += `<div class="flex justify-between items-center"><span class="${css}">${escapeHtml(k)}</span><div><span class="font-bold mr-1">${fmtNum(counts[k])}</span><span class="text-xs text-gray-400">(${pct})</span></div></div>`;
+            html += `<div class="flex justify-between items-center"><span class="${css}">${escapeHtml(k)}</span><div><span class="font-bold mr-1">${fmtNum(counts[k])}</span><span class="text-xs text-gray-500">(${pct})</span></div></div>`;
         }
         document.getElementById(id).innerHTML = html;
     }
@@ -647,19 +742,26 @@
            let tenure = 0;
            if(r[16]) tenure = ((now - new Date(r[16])) / (1000 * 60 * 60 * 24 * 365.25)).toFixed(1);
            const licenseStatus = r[28];
-           const badgeClass = licenseStatus=='มี' ? 'bg-green-100 text-green-800' : (licenseStatus=='หมดอายุ' ? 'bg-orange-100 text-orange-800' : 'bg-red-100 text-red-800');
+           const badgeClass = licenseStatus=='มี' ? 'bg-green-100 text-green-800' : (licenseStatus=='หมดอายุ' ? 'bg-orange-100 text-orange-800' : (licenseStatus=='กำลังต่ออายุ' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'));
            return [
               escapeHtml(r[1]), escapeHtml(r[4]), escapeHtml(`${r[8]}${r[9]} ${r[10]}`), escapeHtml(r[15]), tenure,
-              `<span class="px-2 py-0.5 rounded text-xs ${badgeClass}">${escapeHtml(licenseStatus)}</span>`,
-              `<span class="text-xs text-gray-500">${escapeHtml(r[20])}</span>`
+              licenseStatus ? `<span class="px-2 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap ${badgeClass}">${escapeHtml(licenseStatus)}</span>` : '<span class="text-xs text-gray-400">-</span>',
+              `<span class="text-xs text-gray-600">${escapeHtml(r[20])}</span>`
            ];
        });
        $('#fullTable').DataTable({
           data: rows, responsive: true, destroy: true,
           columns: [{ title: "เขต" }, { title: "โรงพยาบาล" }, { title: "ชื่อ-สกุล" }, { title: "ตำแหน่ง" }, { title: "อายุงาน" }, { title: "ใบประกอบฯ" }, { title: "สถานะ" }],
           pageLength: 10,
-          language: { search: "ค้นหา:", lengthMenu: "แสดง _MENU_ รายการ", info: "แสดง _START_ ถึง _END_ จาก _TOTAL_ รายการ", paginate: { next: "ถัดไป", previous: "ก่อนหน้า" } }
+          language: {
+             search: "ค้นหา:", lengthMenu: "แสดง _MENU_ รายการ", info: "แสดง _START_ ถึง _END_ จาก _TOTAL_ รายการ",
+             infoEmpty: "ไม่มีข้อมูล", infoFiltered: "(กรองจากทั้งหมด _MAX_ รายการ)", zeroRecords: "ไม่พบข้อมูลที่ค้นหา", emptyTable: "ยังไม่มีข้อมูล",
+             paginate: { next: "ถัดไป", previous: "ก่อนหน้า", first: "หน้าแรก", last: "หน้าสุดท้าย" }
+          }
        });
+       // ใช้ตัวกรองเขตที่เลือกไว้กับตารางที่สร้างใหม่ด้วย (เดิมหลังรีเฟรช ตารางกลับไปแสดงทั่วประเทศแม้เลือกเขตไว้)
+       const region = document.getElementById('regionFilter').value;
+       if (region !== 'all') $('#fullTable').DataTable().column(0).search('^'+region+'$', true, false).draw();
     }
 
     let currentRetireeResults = [];
@@ -667,9 +769,20 @@
 
     function calcRetirees() {
        const year = parseInt(document.getElementById('fiscalYear').value);
+       if (!year || year < 2500 || year > 2700) {
+          Swal.fire('ปีงบประมาณไม่ถูกต้อง', 'กรุณาระบุปีงบประมาณเป็น พ.ศ. เช่น ' + currentFiscalYearBE(), 'warning');
+          return;
+       }
        currentRetireeYear = year;
+       const btn = document.getElementById('btnSearchRetirees');
+       const btnHtml = btn.innerHTML;
+       btn.disabled = true;
+       btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2" aria-hidden="true"></i>กำลังค้นหา...';
+       const restoreBtn = () => { btn.disabled = false; btn.innerHTML = btnHtml; };
+
        google.script.run
          .withSuccessHandler(res => {
+            restoreBtn();
             if(res.error) { Swal.fire('เกิดข้อผิดพลาด', res.error, 'error'); return; }
             currentRetireeResults = res.data || [];
             const tbody = document.getElementById('retireTableBody');
@@ -677,20 +790,21 @@
             const exportBtn = document.getElementById('btnExportRetirees');
 
             if(currentRetireeResults.length === 0) {
-               tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-500">ไม่พบผู้เกษียณในปีงบประมาณนี้</td></tr>';
+               tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-500"><i class="fas fa-circle-check text-2xl text-gray-300 block mb-2" aria-hidden="true"></i>ไม่พบผู้เกษียณในปีงบประมาณนี้</td></tr>';
                countEl.textContent = '';
                exportBtn.classList.add('hidden');
             } else {
                let html = '';
                currentRetireeResults.forEach(row => {
-                  html += `<tr class="bg-white border-b hover:bg-red-50"><td class="px-6 py-4 font-medium">${escapeHtml(row.name)}</td><td class="px-6 py-4 text-gray-500">${escapeHtml(row.position)}</td><td class="px-6 py-4 text-center">${escapeHtml(row.region)}</td><td class="px-6 py-4 text-blue-600">${escapeHtml(row.hospital)}</td><td class="px-6 py-4 text-gray-500 text-sm">${escapeHtml(row.type)}</td></tr>`;
+                  html += `<tr class="bg-white hover:bg-red-50"><td class="px-6 py-4 font-medium">${escapeHtml(row.name)}</td><td class="px-6 py-4 text-gray-600">${escapeHtml(row.position)}</td><td class="px-6 py-4 text-center">${escapeHtml(row.region)}</td><td class="px-6 py-4 text-blue-700">${escapeHtml(row.hospital)}</td><td class="px-6 py-4 text-gray-600 text-sm">${escapeHtml(row.type)}</td></tr>`;
                });
                tbody.innerHTML = html;
-               countEl.textContent = `พบผู้เกษียณ ${fmtNum(currentRetireeResults.length)} คน`;
+               countEl.textContent = `พบผู้เกษียณ ${fmtNum(currentRetireeResults.length)} คน (ปีงบประมาณ ${year})`;
                exportBtn.classList.remove('hidden');
             }
          })
          .withFailureHandler(err => {
+            restoreBtn();
             Swal.fire('เกิดข้อผิดพลาดในการเชื่อมต่อ', (err && err.message) ? err.message : 'กรุณาลองใหม่อีกครั้ง', 'error');
          })
          .checkRetirees(year);
