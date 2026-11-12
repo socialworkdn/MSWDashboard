@@ -705,7 +705,8 @@
 
     function renderMiniTable(id, idx, colorMap, data) {
         let counts = {}; for(let k in colorMap) counts[k] = 0;
-        data.forEach(r => { for(let k in colorMap) if(String(r[idx]).includes(k)) counts[k]++; });
+        data.forEach(r => { for(let k in colorMap) if(String(r[idx]).trim() === k) counts[k]++; });
+        // [แก้ไข] เดิมใช้ includes ทำให้ "ไม่มี" ถูกนับเป็น "มี" และ "ไม่เป็น" ถูกนับเป็น "เป็น" ด้วย — เปลี่ยนเป็นเทียบค่าตรงตัว
         let html = '';
         let total = data.length;
         for(let [k, css] of Object.entries(colorMap)) {
